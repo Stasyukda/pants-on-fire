@@ -1,0 +1,28 @@
+name: Deploy to Fly.io
+
+on:
+  push:
+    branches: [ "main" ]   # деплоїти лише коли пуш у main
+  workflow_dispatch:        # і можливість вручну запустити
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node (optional for builds)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@v1
+
+      - name: Deploy
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          flyctl deploy --remote-only
