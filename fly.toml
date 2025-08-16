@@ -1,0 +1,15 @@
+# fly.toml
+
+app = "pants-on-fire"         # <-- ТВОЯ назва застосунку у Fly
+primary_region = "otp"        # Бухарест = otp (як у твоєму launch)
+
+[env]
+  PORT = "3000"
+  NODE_ENV = "production"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 1
