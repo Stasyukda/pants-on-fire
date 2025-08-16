@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="uk">
+<meta charset="utf-8"/>
+<title>Demo Client</title>
+<body>
+  <h2>Demo: підключення до Socket.IO</h2>
+  <p>
+    Room: <input id="room" value="class-1"/>
+    Name: <input id="user" value="StudentA"/>
+    <button id="join">Join</button>
+  </p>
+  <p>
+    Відповідь: <input id="ans" value="Hello"/>
+    <button id="send">Надіслати</button>
+  </p>
+  <pre id="log"></pre>
+
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script>
+    const log = (m) => document.getElementById('log').textContent += m + "\n";
+    const socket = io();
+
+    document.getElementById('join').onclick = () => {
+      const room = document.getElementById('room').value;
+      socket.emit('join', room);
+      log('➡ join ' + room);
+    };
+
+    document.getElementById('send').onclick = () => {
+      const room = document.getElementById('room').value;
+      const user = document.getElementById('user').value;
+      const value = document.getElementById('ans').value;
+      socket.emit('answer', { room, user, value });
+      log(`➡ answer (${user}): ${value}`);
+    };
+
+    socket.on('system', (m) => log('📣 ' + m));
+    socket.on('answer', (p) => log('✅ answer: ' + JSON.stringify(p)));
+    socket.on('score',  (p) => log('⭐ score: '  + JSON.stringify(p)));
+  </script>
+</body>
+</html>
