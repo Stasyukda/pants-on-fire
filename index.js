@@ -314,40 +314,45 @@ app.get("/host", (_req, res) => {
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>${baseCSS}</style>
 
+  <!-- HOST панель -->
+<section class="card" style="margin:16px; padding:16px;">
+
+  <h3 style="margin-bottom:12px;">Host панель</h3>
+
   <div class="host-panel" 
-     style="display:flex; gap:20px; align-items:stretch; margin-top:16px;">
+       style="display:flex; gap:16px; align-items:flex-start;">
 
-  <!-- QR-код зліва -->
-  <div style="flex:0 0 140px; display:flex; align-items:center; justify-content:center;">
-    <canvas id="qrCanvas" 
-            style="width:100%; height:100%; max-width:140px; max-height:140px; 
-                   background:#fff; border-radius:8px;">
-    </canvas>
-  </div>
-
-  <!-- Панель справа -->
-  <div style="flex:1; display:flex; flex-direction:column; gap:12px;">
-
-    <div class="join-row" style="display:flex; gap:8px;">
-      <input id="hostRoom" placeholder="Кімната" value="class-1" 
-             style="flex:1; padding:6px; border-radius:4px;" />
-      <button class="btn btn-primary" id="hostJoinBtn">
-        Створити / Підключитись
-      </button>
+    <!-- QR-код зліва -->
+    <div style="flex:0 0 120px; display:flex; 
+                align-items:center; justify-content:center;">
+      <canvas id="qrCanvas" 
+              style="width:100%; height:auto; max-width:120px; 
+                     background:#fff; border-radius:8px; padding:4px;">
+      </canvas>
     </div>
 
-    <div class="share-link" 
-         style="display:flex; align-items:center; gap:8px;">
-      
-      <input id="shareUrl" type="text" readonly
-             value="https://game.sparkschool.online/player?room=class-1"
-             style="flex:1; padding:6px; border-radius:4px; 
-                    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" />
-      <button class="btn btn-ghost" id="copyLink">Копіювати</button>
-    </div>
+    <!-- Панель справа -->
+    <div style="flex:1; display:flex; flex-direction:column; gap:12px;">
 
+      <div class="join-row" style="display:flex; gap:8px;">
+        <input id="hostRoom" placeholder="Кімната" value="class-1"
+               style="flex:1; padding:8px; border-radius:6px;" />
+        <button class="btn btn-primary" id="hostJoinBtn">
+          Створити / Підключитись
+        </button>
+      </div>
+
+      <div class="share-link" style="display:flex; gap:8px; align-items:center;">
+        <span class="muted">Лінк:</span>
+        <input id="shareUrl" type="text" readonly
+               value="https://game.sparkschool.online/player?room=class-1"
+               style="flex:1; padding:8px; border-radius:6px; 
+                      overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" />
+        <button class="btn btn-ghost" id="copyLink">Копіювати</button>
+      </div>
+    </div>
   </div>
-</div>
+</section>
 
       <div style="margin-top:12px">
 
