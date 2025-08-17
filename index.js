@@ -338,7 +338,7 @@ app.get("/host", (_req, res) => {
 
     <div class="share-link" 
          style="display:flex; align-items:center; gap:8px;">
-      <span class="muted">Лінк:</span>
+      
       <input id="shareUrl" type="text" readonly
              value="https://game.sparkschool.online/player?room=class-1"
              style="flex:1; padding:6px; border-radius:4px; 
@@ -350,8 +350,6 @@ app.get("/host", (_req, res) => {
 </div>
 
       <div style="margin-top:12px">
-        <canvas id="qrCanvas" width="128" height="128" style="background:#fff;border-radius:8px"></canvas>
-      </div>
 
       <h3 style="margin-top:16px">Нове питання</h3>
       <div class="card" style="padding:12px">
