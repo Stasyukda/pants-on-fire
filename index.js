@@ -271,12 +271,25 @@ input,textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid 
   body{font-size:15px}
   .log-box{font-size:12.5px}
 }
+/* ===== Mobile layout ===== */
+.layout-host, .layout-player { display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
+.player-card { order:1; }
+.events-card { order:2; }
+
+/* Портретна мобілка: одна колонка, Події під формою */
+@media (max-width: 768px){
+  .layout-host, .layout-player { grid-template-columns: 1fr; }
+  .player-card { order:1; }
+  .events-card { order:2; }
+  .btn, .btn-primary, .btn-ghost { width:100%; }
+}
 `;
 
 // Домашня
 app.get("/", (_req, res) => {
   res.type("html").send(`<!doctype html><meta charset="utf-8"/>
   <title>SparkSchool Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>${baseCSS}</style>
   <div class="wrap grid">
     <section class="card">
@@ -304,6 +317,7 @@ app.get("/", (_req, res) => {
 app.get("/host", (req, res) => {
   res.type("html").send(`<!doctype html><meta charset="utf-8"/>
   <title>Host • SparkSchool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>${baseCSS}</style>
   <div class="grid-2">
   <!-- HOST панель -->
@@ -413,6 +427,38 @@ app.get("/host", (req, res) => {
     socket.on("tick", (sec)=>{ $("timer").textContent = sec + "s"; });
     socket.on("timeup", ()=>log("⏰ Час вийшов"));
   </script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script>
+  function buildPlayerLink() {
+    const room = (document.getElementById('hostRoom')?.value || 'class-1').trim();
+    return `${location.origin}/player?room=${encodeURIComponent(room)}`;
+  }
+
+  function updateShare() {
+    const link = buildPlayerLink();
+    const share = document.getElementById('shareUrl');
+    const qrCanvas = document.getElementById('qrCanvas');
+
+    if (share) share.value = link;
+    if (qrCanvas) {
+      QRCode.toCanvas(qrCanvas, link, { width: 128 }, function (error) {
+        if (error) console.error(error);
+      });
+    }
+  }
+
+  // копіювання
+  document.getElementById('copyLink')?.addEventListener('click', () => {
+    const share = document.getElementById('shareUrl');
+    share.select();
+    document.execCommand('copy');
+  });
+
+  // оновлювати при вводі кімнати + на старті
+  document.getElementById('hostRoom')?.addEventListener('input', updateShare);
+  document.addEventListener('DOMContentLoaded', updateShare);
+</script>
+  
   `);
 });
 
