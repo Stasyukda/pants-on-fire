@@ -324,11 +324,24 @@ app.get("/host", (_req, res) => {
         <button class="btn btn-primary" id="hostJoinBtn">Створити / Підключитись</button>
       </div>
 
-      <div class="share-link">
-        <span class="muted">Лінк:</span>
-        <input id="shareUrl" type="text" readonly value="" />
-        <button class="btn btn-ghost" id="copyLink">Копіювати</button>
-      </div>
+      <div class="share-link" 
+     style="display:flex; align-items:center; gap:8px; margin-top:8px;">
+
+  <span class="muted" style="white-space:nowrap;">Лінк:</span>
+
+  <input id="shareUrl" 
+         type="text" 
+         readonly 
+         value="https://game.sparkschool.online/player?room=class-1"
+         style="flex:1; height:32px; font-size:14px; padding:4px; border-radius:4px; 
+                overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" />
+
+  <button class="btn btn-ghost" 
+          id="copyLink" 
+          style="height:32px; white-space:nowrap;">
+    Копіювати
+  </button>
+</div>
 
       <div style="margin-top:12px">
         <canvas id="qrCanvas" width="128" height="128" style="background:#fff;border-radius:8px"></canvas>
