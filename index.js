@@ -359,154 +359,166 @@ app.get("/", (_req, res) => {
   </div>`);
 });
 
-// Host UI
-app.get("/host", (_req, res) => {
+// Host UI (єдина картка з QR + керуванням + «Нове питання»)
+app.get("/host", (req, res) => {
   res.type("html").send(`<!doctype html><meta charset="utf-8"/>
-  <title>Host • SparkSchool</title>
+  <title>Панель вчителя • SparkSchool</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>${baseCSS}</style>
 
-  <!-- HOST панель -->
-<section style="margin:16px 16px 0; padding:0;">
-  <h3 style="margin:0 0 12px">Панель вчителя</h3>
+  <div class="wrap">
+    <div class="card">
+      <h2>Панель вчителя</h2>
 
-  <div style="display:flex; gap:16px; align-items:flex-start">
-    <!-- QR зліва -->
-    <div class="qrBox">
-      <canvas id="qrCanvas"></canvas>
-    </div>
+      <!-- верхній ряд: QR ліворуч, керування праворуч -->
+      <div class="row-2" style="align-items:flex-start; margin-top:12px">
+        <canvas id="qrCanvas" width="160" height="160" class="qr"></canvas>
 
-    <!-- Праворуч: по два combo-ряди -->
-    <div style="flex:1; display:flex; flex-direction:column; gap:12px">
+        <div style="display:flex; flex-direction:column; gap:12px; width:100%">
+          <div class="row-2" style="gap:10px">
+            <input id="hostRoom" placeholder="Кімната" value="class-1" />
+            <button class="btn btn-primary" id="hostJoinBtn">Створити / Підключитись</button>
+          </div>
 
-      <!-- Ряд 1: Клас + Створити/Підключитись -->
-      <div class="combo">
-        <input id="hostRoom" placeholder="Кімната" value="class-1"/>
-        <button class="btn btn-primary" id="hostJoinBtn">Створити / Підключитись</button>
+          <div class="row-2" style="gap:10px">
+            <input id="shareUrl" type="text" readonly />
+            <button class="btn" id="copyLink">Копіювати</button>
+          </div>
+        </div>
       </div>
 
-      <!-- Ряд 2: Лінк + Копіювати (без заголовка "Лінк") -->
-      <div class="combo">
-        <input id="shareUrl" type="text" readonly
-               value="https://game.sparkschool.online/player?room=class-1"/>
-        <button class="btn btn-ghost" id="copyLink">Копіювати</button>
+      <!-- НОВЕ ПИТАННЯ — в тій самій картці нижче -->
+      <h3 style="margin:18px 0 10px">Нове питання</h3>
+      <div class="panel">
+        <div class="form" style="display:flex; flex-direction:column; gap:12px">
+          <input id="qText" placeholder="Питання (напр.: Як перекладається слово lightning?)" />
+
+          <div class="row-2" style="gap:10px">
+            <input id="optA" placeholder="Варіант A" />
+            <input id="optB" placeholder="Варіант B" />
+          </div>
+          <div class="row-2" style="gap:10px">
+            <input id="optC" placeholder="Варіант C" />
+            <input id="optD" placeholder="Варіант D" />
+          </div>
+          <div class="row-2" style="gap:10px">
+            <input id="right" placeholder="Правильна (0-3)" />
+            <input id="time" inputmode="numeric" pattern="\\d*" placeholder="Таймер (сек)" value="20" />
+          </div>
+
+          <div class="actions-3" style="margin-top:4px">
+            <button class="btn btn-primary" id="btnStart">Start</button>
+            <button class="btn" id="btnReveal">Reveal</button>
+            <button class="btn" id="btnNext">Next</button>
+          </div>
+        </div>
       </div>
 
-    </div>
-  </div>
-</section>
-
-      <div style="margin-top:12px">
-
-      <h3 style="margin:0 0 12px">Нове питання</h3>
-<div class="panel">
-  <div class="form">
-    <input id="qText" placeholder="Питання (напр.: Як перекладається слово lightning?)" />
-    <div class="row-2">
-      <input id="optA" placeholder="Варіант A" />
-      <input id="optB" placeholder="Варіант B" />
-    </div>
-    <div class="row-2">
-      <input id="optC" placeholder="Варіант C" />
-      <input id="optD" placeholder="Варіант D" />
-    </div>
-    <div class="row-2">
-      <input id="right" placeholder="Правильна (0-3)" />
-      <input id="time" inputmode="numeric" pattern="\d*" placeholder="Таймер (сек)" value="20" />
-    </div>
-    <div class="actions-3" style="margin-top:6px">
-      <button class="btn btn-primary" id="btnStart">Start</button>
-      <button class="btn" id="btnReveal">Reveal</button>
-      <button class="btn" id="btnNext">Next</button>
-    </div>
-  </div>
-</div>
-    </section>
-
-    <!-- Стан/Події -->
-    <section class="card events-card">
-      <h3>Стан</h3>
+      <!-- Стан/події також внизу цієї ж картки -->
+      <h3 style="margin:18px 0 10px">Стан</h3>
       <div class="muted" id="hostState">Таймер: 0 • Гравців: 0</div>
-
-      <h3 style="margin-top:10px">Учасники</h3>
+      <h3 style="margin:14px 0 8px">Учасники</h3>
       <ul id="hostUsers" class="card" style="min-height:56px; padding:8px"></ul>
-
-      <h3 style="margin-top:10px">Події</h3>
+      <h3 style="margin:14px 0 8px">Події</h3>
       <div id="hostLog" class="log-box"></div>
-    </section>
+    </div>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <script>
+    // утиліти
     const $ = (id)=>document.getElementById(id);
-    const origin = location.origin.replace(/\\/$/,'');
+    const origin = location.origin.replace(/\\/$/,"");
     const socket = io(origin, { transports: ["websocket","polling"] });
-
     let currentRoom = null;
 
-    function hostLog(msg){
+    // лог у «Події»
+    function log(m){
       const box = $("hostLog");
-      box.innerHTML += msg + "<br/>";
+      box.innerHTML += m + "<br/>";
       box.scrollTop = box.scrollHeight;
     }
 
+    // посилання для player
     function buildPlayerLink(){
       const room = ($("hostRoom")?.value || "class-1").trim();
-      return \`\${origin}/player?room=\${encodeURIComponent(room)}\`;
+      return origin + "/player?room=" + encodeURIComponent(room);
     }
-    function updateShare(){
+
+    // оновити поле лінку + QR
+    async function updateShare(){
       const link = buildPlayerLink();
       if ($("shareUrl")) $("shareUrl").value = link;
-      if ($("qrCanvas")) {
-        QRCode.toCanvas($("qrCanvas"), link, { width: 128 }, (e)=>{ if (e) console.error(e); });
+      if ($("qrCanvas")){
+        try { await QRCode.toCanvas($("qrCanvas"), link, { width: 160 }); }
+        catch(e){ console.error(e); }
       }
     }
 
-    $("hostJoinBtn").onclick = ()=>{
-      currentRoom = $("hostRoom").value.trim() || "class-1";
+    // копіювання (новий Clipboard API + фолбек)
+    $("copyLink")?.addEventListener("click", async () => {
+      const link = $("shareUrl")?.value || buildPlayerLink();
+      try {
+        await navigator.clipboard.writeText(link);
+        log("📋 Лінк скопійовано");
+      } catch {
+        const i = $("shareUrl");
+        if (i) { i.focus(); i.select(); document.execCommand("copy"); }
+        log("📋 Лінк скопійовано");
+      }
+    });
+
+    // Приєднатись як HOST
+    $("hostJoinBtn").onclick = () => {
+      currentRoom = ($("hostRoom").value || "class-1").trim();
       socket.emit("host:create", { room: currentRoom });
       updateShare();
-      hostLog("✓ Підключено як HOST до " + currentRoom);
+      log("✓ Підключено як HOST до " + currentRoom);
     };
 
-    $("btnStart").onclick = ()=>{
+    // Кімната змінюється — оновлюємо QR/лінк
+    $("hostRoom").addEventListener("input", updateShare);
+    document.addEventListener("DOMContentLoaded", updateShare);
+
+    // Старт питання
+    $("btnStart").onclick = () => {
       if (!currentRoom) return alert("Спершу створіть/виберіть кімнату");
       const q = $("qText").value.trim();
-      const choices = [ $("optA").value, $("optB").value, $("optC").value, $("optD").value ]
-        .map(x=>x.trim()).filter(x=>x.length>0);
-      const dur = parseInt($("time").value || "20", 10);
+      const choices = ["optA","optB","optC","optD"].map(id => $(id).value.trim()).filter(Boolean);
+      const dur = parseInt(($("time").value || "20"), 10);
       if (!q || choices.length < 2) return alert("Питання і щонайменше 2 варіанти!");
       socket.emit("host:start", { room: currentRoom, question: q, choices, duration: dur });
-      hostLog("▶ Старт питання");
+      log("▶ Старт питання");
     };
 
-    $("btnReveal").onclick = ()=>{
+    // Reveal
+    $("btnReveal").onclick = () => {
       if (!currentRoom) return;
-      const idx = parseInt($("right").value || "0", 10);
+      const idx = parseInt(($("right").value || "0"), 10);
       socket.emit("host:reveal", { room: currentRoom, correct: idx });
-      hostLog("👁 Reveal: " + idx);
+      log("👁 Reveal: " + idx);
     };
 
-    $("btnNext").onclick = ()=>{
+    // Next
+    $("btnNext").onclick = () => {
       if (!currentRoom) return;
       socket.emit("host:next", { room: currentRoom });
-      hostLog("↻ Next round");
+      log("↻ Next round");
     };
 
-    socket.on("host:ready", ({room})=>{ currentRoom = room; updateShare(); });
-    socket.on("presence", (list)=>{
-      $("hostState").textContent = \`Таймер: 0 • Гравців: \${list.length}\`;
-      $("hostUsers").innerHTML = list.map(p=>\`<li>\${p.name}</li>\`).join("");
+    // сокети для стану
+    socket.on("host:ready", ({room}) => { currentRoom = room; updateShare(); });
+    socket.on("presence", (list) => {
+      $("hostState").textContent = "Таймер: 0 • Гравців: " + list.length;
+      $("hostUsers").innerHTML = list.map(p => "<li>"+p.name+"</li>").join("");
     });
-    socket.on("system", (e)=>hostLog("• " + e.text));
-    socket.on("tick", (sec)=>{ // простий показ таймера у стані
-      const players = $("hostUsers").children.length;
-      $("hostState").textContent = \`Таймер: \${sec} • Гравців: \${players}\`;
+    socket.on("system", (e) => log("• " + e.text));
+    socket.on("tick", (sec) => { 
+      const t = $("hostState").textContent.replace(/Таймер: \\d+/, "Таймер: " + sec);
+      $("hostState").textContent = t;
     });
-
-    $("hostRoom")?.addEventListener("input", updateShare);
-    document.addEventListener("DOMContentLoaded", updateShare);
+    socket.on("timeup", () => log("⏰ Час вийшов"));
   </script>
   `);
 });
