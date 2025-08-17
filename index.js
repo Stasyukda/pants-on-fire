@@ -5,7 +5,6 @@ const express = require("express");
 const http = require("http");
 const cors = require("cors");
 const { Server } = require("socket.io");
-const path = require("path");
 
 const app = express();
 const server = http.createServer(app);
@@ -17,21 +16,22 @@ const io = new Server(server, {
   cors: { origin: "*", methods: ["GET", "POST"] },
 });
 
-// ====== ІГРОВА МОДЕЛЬ В ПАМ'ЯТІ ===========================================
-/*
+/* ===================== ІГРОВА МОДЕЛЬ =====================
+
 room = {
-  players: Map<socketId,string>,       // хто в кімнаті
-  scores: Map<string, number>,         // бали по імені
-  state: 'lobby'|'question'|'reveal'|'ended',
+  players: Map<socketId,string>,           // хто в кімнаті
+  scores: Map<string, number>,             // бали по імені
+  state: 'lobby'|'question'|'reveal',
   question: string|null,
-  choices: string[],                   // варіанти
-  correct: number|null,                // індекс правильної
-  endsAt: number,                      // дедлайн (ms)
-  answers: Map<socketId, {name, idx, at}>, // відповіді раунду
+  choices: string[],                        // варіанти
+  correct: number|null,                     // індекс правильної
+  endsAt: number,                           // дедлайн (ms)
+  answers: Map<socketId,{name,idx,at}>,     // відповіді на раунд
   timer: NodeJS.Timeout|null
 }
 */
 const rooms = new Map();
+
 function getRoom(code) {
   if (!rooms.has(code)) {
     rooms.set(code, {
@@ -48,6 +48,7 @@ function getRoom(code) {
   }
   return rooms.get(code);
 }
+
 function presenceList(room) {
   const set = io.sockets.adapter.rooms.get(room);
   if (!set) return [];
@@ -58,6 +59,7 @@ function presenceList(room) {
   }
   return list;
 }
+
 function broadcastScoreboard(roomCode) {
   const R = getRoom(roomCode);
   const rows = [...R.scores.entries()]
@@ -65,6 +67,7 @@ function broadcastScoreboard(roomCode) {
     .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
   io.to(roomCode).emit("scoreboard", rows);
 }
+
 function stopTimer(roomCode) {
   const R = getRoom(roomCode);
   if (R.timer) {
@@ -73,12 +76,13 @@ function stopTimer(roomCode) {
   }
 }
 
-// ====== SOCKET.IO ЛОГІКА ===================================================
+/* ===================== SOCKET.IO ===================== */
 io.on("connection", (socket) => {
-  // join: {room, name}
+  // Join як гравець
   socket.on("player:join", ({ room, name }) => {
     if (!room) return;
     const nick = (name || "Student").toString().slice(0, 40).trim();
+
     socket.join(room);
     socket.data.room = room;
     socket.data.name = nick;
@@ -91,7 +95,7 @@ io.on("connection", (socket) => {
     io.to(room).emit("presence", presenceList(room));
     broadcastScoreboard(room);
 
-    // якщо вже йде питання — надішлемо стан новому гравцю
+    // якщо вже йде раунд — дати стан
     if (R.state === "question") {
       socket.emit("question", {
         question: R.question,
@@ -103,41 +107,41 @@ io.on("connection", (socket) => {
     }
   });
 
-  // учнівська відповідь: {idx}
+  // Відповідь гравця
   socket.on("player:answer", ({ idx }) => {
     const room = socket.data?.room;
     const name = socket.data?.name || "Student";
-    if (room == null) return;
+    if (!room) return;
+
     const R = getRoom(room);
-    if (R.state !== "question") return; // приймаємо тільки під час питання
+    if (R.state !== "question") return;
     if (Date.now() > R.endsAt) return;
-    if (R.answers.has(socket.id)) return; // один раз
+    if (R.answers.has(socket.id)) return; // лише раз
 
     const choice = Number(idx);
     R.answers.set(socket.id, { name, idx: choice, at: Date.now() });
-    // опційно: підтвердження лише цьому гравцю
     socket.emit("answer:ack", { ok: true, idx: choice });
   });
 
-  // HOST: створити або приєднатись як ведучий
+  // Host створює/приєднується
   socket.on("host:create", ({ room }) => {
     if (!room) return;
     socket.join(room);
     socket.data.room = room;
     socket.data.name = "HOST";
-    getRoom(room); // ініціюємо
+    getRoom(room);
     socket.emit("host:ready", { room });
     io.to(room).emit("presence", presenceList(room));
     broadcastScoreboard(room);
   });
 
-  // HOST: старт раунду
-  // payload: {room, question, choices, duration}
+  // Host стартує раунд
   socket.on("host:start", ({ room, question, choices, duration }) => {
     if (!room || !question || !Array.isArray(choices) || choices.length < 2)
       return;
     const R = getRoom(room);
     stopTimer(room);
+
     R.state = "question";
     R.question = question.toString().slice(0, 300);
     R.choices = choices.map((c) => c.toString().slice(0, 120));
@@ -153,7 +157,6 @@ io.on("connection", (socket) => {
       endsIn: sec,
     });
 
-    // Тікер таймера
     R.timer = setInterval(() => {
       const left = Math.ceil((R.endsAt - Date.now()) / 1000);
       io.to(room).emit("tick", Math.max(0, left));
@@ -164,15 +167,14 @@ io.on("connection", (socket) => {
     }, 1000);
   });
 
-  // HOST: reveal (оголосити правильну)
-  // payload: {room, correct}  (індекс)
+  // Host відкриває відповідь
   socket.on("host:reveal", ({ room, correct }) => {
     if (!room) return;
     const R = getRoom(room);
     stopTimer(room);
     R.state = "reveal";
     R.correct = Number(correct);
-    // нарахуємо бали
+
     for (const { name, idx } of R.answers.values()) {
       if (idx === R.correct) {
         R.scores.set(name, (R.scores.get(name) || 0) + 1);
@@ -182,7 +184,7 @@ io.on("connection", (socket) => {
     broadcastScoreboard(room);
   });
 
-  // HOST: next (очистити стан до лобі, зберігши бали)
+  // Host наступний раунд
   socket.on("host:next", ({ room }) => {
     if (!room) return;
     const R = getRoom(room);
@@ -196,7 +198,7 @@ io.on("connection", (socket) => {
     io.to(room).emit("system", { type: "info", text: "Новий раунд скоро" });
   });
 
-  // вийти з кімнати
+  // Вихід/дисконект
   socket.on("player:leave", () => {
     const room = socket.data?.room;
     const name = socket.data?.name;
@@ -220,44 +222,47 @@ io.on("connection", (socket) => {
   });
 });
 
-// ====== HTML UI (мінімальний, але «ігровий») ===============================
+/* ===================== ГЛОБАЛЬНИЙ CSS ===================== */
 const baseCSS = `
-:root{--bg:#0f1226;--text:#e8eef6;--muted:#9fb3d8;--accent:#ffb300;--card:#171a34;--ok:#22c55e;--err:#ef4444}
-*{box-sizing:border-box} body{margin:0;background:radial-gradient(1200px 800px at 80% -10%,#2a2f63 0%,rgba(15,18,38,.6) 60%),var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif}
+:root{
+  --bg:#0f1226;--text:#e8eef6;--muted:#9fb3d8;
+  --accent:#ffb300;--card:#171a34;--ok:#22c55e;--err:#ef4444
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(1200px 800px at 80% -10%,#2a2f63 0%,rgba(15,18,38,.6) 60%),var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif}
 .wrap{max-width:1000px;margin:32px auto;padding:16px}
-.card{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:18px;box-shadow:0 20px 40px rgba(0,0,0,.35)}
+.card{background:rgba(20,26,48,.6);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
 h1,h2,h3{margin:0 0 10px 0} .muted{color:var(--muted)}
-.grid{display:grid;gap:16px} @media(min-width:860px){.grid-2{grid-template-columns:1.2fr .8fr}}
+.grid{display:grid;gap:16px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(min-width:860px){.grid-2.wide-cols{grid-template-columns:1.2fr .8fr}}
 label{font-size:.85rem;color:var(--muted)}
 input,textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:#0b1220;color:#fff}
-.row{display:grid;gap:12px;grid-template-columns:1fr 1fr 140px}
 .btn{padding:.7rem 1rem;border:0;border-radius:12px;background:linear-gradient(135deg,#ffb300,#ff6f00);color:#1b1200;font-weight:800;cursor:pointer}
+.btn.btn-primary{background:linear-gradient(135deg,#ffb300,#ff6f00)}
+.btn.btn-ghost{background:rgba(255,255,255,.08);color:#fff}
 .btn.sec{background:#0ea5e9;color:#001018}
 .badge{display:inline-flex;gap:.5rem;align-items:center;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);padding:.35rem .6rem;border-radius:999px;color:var(--muted)}
-.log{height:240px;overflow:auto;background:#0b1220;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px;font-family:ui-monospace,Consolas,monospace}
-.list li{margin:.25rem 0}
-.timer{font-weight:900;font-size:48px;letter-spacing:1px}
+.log-box{min-height:160px;font-family:ui-monospace,Consolas,monospace;font-size:13px;line-height:1.35;white-space:pre-wrap;background:rgba(10,12,24,.55);border:1px dashed rgba(255,255,255,.12);border-radius:12px;padding:12px;overflow:auto}
 .choices{display:grid;gap:10px;margin-top:12px}
 .choice{border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:12px;background:#0b1220;cursor:pointer}
 .choice.correct{outline:2px solid var(--ok)}
 .choice.wrong{opacity:.5}
 .score{display:flex;flex-direction:column;gap:6px}
-.score .row{grid-template-columns:1fr 60px}
-.qr{background:#fff;border-radius:12px;padding:6px}
-/* ====== Mobile-first покращення ====== */
-.card{background:rgba(20,26,48,.6);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.row{display:grid;gap:12px;grid-template-columns:1fr 60px}
 .btn-row{display:flex;gap:10px;flex-wrap:wrap}
-.btn-row>*{height:44px}
+.actions-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .join-row{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center}
 .share-link{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
 .share-link input[type="text"]{flex:1 1 260px;min-width:0}
-.log-box{min-height:160px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;font-size:13px;line-height:1.35;white-space:pre-wrap;background:rgba(10,12,24,.55);border:1px dashed rgba(255,255,255,.12);border-radius:12px;padding:12px;overflow:auto}
-.actions-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 
-/* Портрет ≤768px */
+.layout-host, .layout-player{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.player-card{order:1}
+.events-card{order:2}
+
+/* Мобільна портретна — все у стовпчик, події під формою */
 @media (max-width:768px){
-  .grid-2{grid-template-columns:1fr}
+  .grid-2, .layout-host, .layout-player{grid-template-columns:1fr}
   .player-card{order:1}
   .events-card{order:2}
   .join-row{grid-template-columns:1fr}
@@ -266,24 +271,13 @@ input,textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid 
   .share-link{flex-direction:column;align-items:stretch}
   h2,h3{font-size:18px}
 }
-/* Дуже вузькі */
 @media (max-width:380px){
   body{font-size:15px}
   .log-box{font-size:12.5px}
 }
-/* ===== Mobile layout ===== */
-.layout-host, .layout-player { display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
-.player-card { order:1; }
-.events-card { order:2; }
-
-/* Портретна мобілка: одна колонка, Події під формою */
-@media (max-width: 768px){
-  .layout-host, .layout-player { grid-template-columns: 1fr; }
-  .player-card { order:1; }
-  .events-card { order:2; }
-  .btn, .btn-primary, .btn-ghost { width:100%; }
-}
 `;
+
+/* ===================== РОУТИ ===================== */
 
 // Домашня
 app.get("/", (_req, res) => {
@@ -302,11 +296,11 @@ app.get("/", (_req, res) => {
       </p>
     </section>
     <section class="card">
-      <h3>Пояснення</h3>
+      <h3>Як працює</h3>
       <ol>
-        <li>Вчитель відкриває <b>/host</b>, створює кімнату (наприклад, <code>class-1</code>).</li>
-        <li>Учні відкривають <b>/player</b>, вводять код кімнати/ім’я або сканують QR.</li>
-        <li>Host задає питання, варіанти, запускає таймер; після — Reveal.</li>
+        <li>Вчитель відкриває <b>/host</b> і створює кімнату (наприклад, <code>class-1</code>).</li>
+        <li>Учні відкривають <b>/player</b>, вводять код/ім’я або сканують QR.</li>
+        <li>Host задає питання, варіанти та запускає таймер; потім — Reveal.</li>
         <li>Проектор <b>/screen?room=class-1</b> показує питання, таймер і таблицю балів.</li>
       </ol>
     </section>
@@ -314,151 +308,141 @@ app.get("/", (_req, res) => {
 });
 
 // Host UI
-app.get("/host", (req, res) => {
+app.get("/host", (_req, res) => {
   res.type("html").send(`<!doctype html><meta charset="utf-8"/>
   <title>Host • SparkSchool</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>${baseCSS}</style>
-  <div class="grid-2">
-  <!-- HOST панель -->
-  <section class="card">
-    <h3>Host панель</h3>
 
-    <div class="join-row">
-      <input id="hostRoom" placeholder="Кімната" value="class-1" />
-      <button class="btn btn-primary" id="hostJoinBtn">Створити / Підключитись</button>
-    </div>
+  <div class="layout-host wrap" style="max-width:1100px">
+    <!-- HOST панель -->
+    <section class="card">
+      <h3>Host панель</h3>
 
-    <div class="share-link">
-      <span class="muted">Лінк:</span>
-      <input id="shareUrl" type="text" readonly value="https://game.sparkschool.online/player?room=class-1" />
-      <button class="btn btn-ghost" id="copyLink">Копіювати</button>
-    </div>
-
-    <div style="margin-top:12px">
-      <canvas id="qrCanvas" width="128" height="128" style="background:#fff;border-radius:8px"></canvas>
-    </div>
-
-    <h3 style="margin-top:16px">Нове питання</h3>
-    <div class="card" style="padding:12px">
-      <input id="qText" placeholder="Питання (напр.: Як перекладається слово lightning?)" />
-      <div class="btn-row" style="margin-top:10px">
-        <input id="optA" placeholder="Варіант A" />
-        <input id="optB" placeholder="Варіант B" />
-      </div>
-      <div class="btn-row" style="margin-top:10px">
-        <input id="optC" placeholder="Варіант C" />
-        <input id="optD" placeholder="Варіант D" />
-      </div>
-      <div class="btn-row" style="margin-top:10px">
-        <input id="right" placeholder="Правильна (0-3)" />
-        <input id="time" inputmode="numeric" pattern="\d*" placeholder="Таймер (сек)" value="20" />
+      <div class="join-row" style="margin-top:8px">
+        <input id="hostRoom" placeholder="Кімната" value="class-1" />
+        <button class="btn btn-primary" id="hostJoinBtn">Створити / Підключитись</button>
       </div>
 
-      <div class="actions-3" style="margin-top:12px">
-        <button class="btn btn-primary" id="btnStart">Start</button>
-        <button class="btn" id="btnReveal">Reveal</button>
-        <button class="btn" id="btnNext">Next</button>
+      <div class="share-link">
+        <span class="muted">Лінк:</span>
+        <input id="shareUrl" type="text" readonly value="" />
+        <button class="btn btn-ghost" id="copyLink">Копіювати</button>
       </div>
-    </div>
-  </section>
 
-  <!-- Стан/Події -->
-  <section class="card">
-    <h3>Стан</h3>
-    <div class="muted" id="hostState">Таймер: 0 • Гравців: 0</div>
+      <div style="margin-top:12px">
+        <canvas id="qrCanvas" width="128" height="128" style="background:#fff;border-radius:8px"></canvas>
+      </div>
 
-    <h3 style="margin-top:10px">Учасники</h3>
-    <ul id="hostUsers" class="card" style="min-height:56px; padding:8px"></ul>
+      <h3 style="margin-top:16px">Нове питання</h3>
+      <div class="card" style="padding:12px">
+        <input id="qText" placeholder="Питання (напр.: Як перекладається слово lightning?)" />
+        <div class="btn-row" style="margin-top:10px">
+          <input id="optA" placeholder="Варіант A" />
+          <input id="optB" placeholder="Варіант B" />
+        </div>
+        <div class="btn-row" style="margin-top:10px">
+          <input id="optC" placeholder="Варіант C" />
+          <input id="optD" placeholder="Варіант D" />
+        </div>
+        <div class="btn-row" style="margin-top:10px">
+          <input id="right" placeholder="Правильна (0-3)" />
+          <input id="time" inputmode="numeric" pattern="\\d*" placeholder="Таймер (сек)" value="20" />
+        </div>
 
-    <h3 style="margin-top:10px">Події</h3>
-    <div id="hostLog" class="log-box"></div>
-  </section>
-</div>
+        <div class="actions-3" style="margin-top:12px">
+          <button class="btn btn-primary" id="btnStart">Start</button>
+          <button class="btn" id="btnReveal">Reveal</button>
+          <button class="btn" id="btnNext">Next</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Стан/Події -->
+    <section class="card events-card">
+      <h3>Стан</h3>
+      <div class="muted" id="hostState">Таймер: 0 • Гравців: 0</div>
+
+      <h3 style="margin-top:10px">Учасники</h3>
+      <ul id="hostUsers" class="card" style="min-height:56px; padding:8px"></ul>
+
+      <h3 style="margin-top:10px">Події</h3>
+      <div id="hostLog" class="log-box"></div>
+    </section>
+  </div>
 
   <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <script>
     const $ = (id)=>document.getElementById(id);
-    const log = (m)=>{$("log").innerHTML += m+"<br/>"; $("log").scrollTop = $("log").scrollHeight;}
-    const origin = location.origin.replace(/\\/$/,"");
+    const origin = location.origin.replace(/\\/$/,'');
     const socket = io(origin, { transports: ["websocket","polling"] });
+
     let currentRoom = null;
 
-    function updateLinks() {
-      const url = origin + "/player#room=" + encodeURIComponent(currentRoom||"");
-      $("deeplink").textContent = url;
-      $("qr").src = "https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=" + encodeURIComponent(url);
+    function hostLog(msg){
+      const box = $("hostLog");
+      box.innerHTML += msg + "<br/>";
+      box.scrollTop = box.scrollHeight;
     }
 
-    $("create").onclick = ()=>{
-      currentRoom = $("room").value.trim() || "class-1";
+    function buildPlayerLink(){
+      const room = ($("hostRoom")?.value || "class-1").trim();
+      return \`\${origin}/player?room=\${encodeURIComponent(room)}\`;
+    }
+    function updateShare(){
+      const link = buildPlayerLink();
+      if ($("shareUrl")) $("shareUrl").value = link;
+      if ($("qrCanvas")) {
+        QRCode.toCanvas($("qrCanvas"), link, { width: 128 }, (e)=>{ if (e) console.error(e); });
+      }
+    }
+
+    $("hostJoinBtn").onclick = ()=>{
+      currentRoom = $("hostRoom").value.trim() || "class-1";
       socket.emit("host:create", { room: currentRoom });
-      updateLinks();
-      log("✓ Підключено як HOST до " + currentRoom);
+      updateShare();
+      hostLog("✓ Підключено як HOST до " + currentRoom);
     };
 
-    $("start").onclick = ()=>{
+    $("btnStart").onclick = ()=>{
       if (!currentRoom) return alert("Спершу створіть/виберіть кімнату");
-      const q = $("q").value.trim();
-      const choices = [$("c0").value, $("c1").value, $("c2").value, $("c3").value].filter(x=>x.trim().length>0);
-      const dur = parseInt($("dur").value||"20",10);
-      if (!q || choices.length<2) return alert("Питання і щонайменше 2 варіанти!");
+      const q = $("qText").value.trim();
+      const choices = [ $("optA").value, $("optB").value, $("optC").value, $("optD").value ]
+        .map(x=>x.trim()).filter(x=>x.length>0);
+      const dur = parseInt($("time").value || "20", 10);
+      if (!q || choices.length < 2) return alert("Питання і щонайменше 2 варіанти!");
       socket.emit("host:start", { room: currentRoom, question: q, choices, duration: dur });
-      log("▶ Старт питання");
+      hostLog("▶ Старт питання");
     };
 
-    $("reveal").onclick = ()=>{
+    $("btnReveal").onclick = ()=>{
       if (!currentRoom) return;
-      const idx = parseInt($("correct").value||"0",10);
+      const idx = parseInt($("right").value || "0", 10);
       socket.emit("host:reveal", { room: currentRoom, correct: idx });
-      log("👁 Reveal: " + idx);
+      hostLog("👁 Reveal: " + idx);
     };
 
-    $("next").onclick = ()=>{
+    $("btnNext").onclick = ()=>{
       if (!currentRoom) return;
       socket.emit("host:next", { room: currentRoom });
-      $("timer").textContent = "—";
-      log("↻ Next round");
+      hostLog("↻ Next round");
     };
 
-    socket.on("host:ready", ({room})=>{ currentRoom = room; updateLinks(); });
-    socket.on("presence", (list)=>{ $("count").textContent = list.length; $("people").innerHTML = list.map(p=>"<li>"+p.name+"</li>").join(""); });
-    socket.on("system", (e)=>log("• " + e.text));
-    socket.on("tick", (sec)=>{ $("timer").textContent = sec + "s"; });
-    socket.on("timeup", ()=>log("⏰ Час вийшов"));
+    socket.on("host:ready", ({room})=>{ currentRoom = room; updateShare(); });
+    socket.on("presence", (list)=>{
+      $("hostState").textContent = \`Таймер: 0 • Гравців: \${list.length}\`;
+      $("hostUsers").innerHTML = list.map(p=>\`<li>\${p.name}</li>\`).join("");
+    });
+    socket.on("system", (e)=>hostLog("• " + e.text));
+    socket.on("tick", (sec)=>{ // простий показ таймера у стані
+      const players = $("hostUsers").children.length;
+      $("hostState").textContent = \`Таймер: \${sec} • Гравців: \${players}\`;
+    });
+
+    $("hostRoom")?.addEventListener("input", updateShare);
+    document.addEventListener("DOMContentLoaded", updateShare);
   </script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-<script>
-  function buildPlayerLink() {
-    const room = (document.getElementById('hostRoom')?.value || 'class-1').trim();
-    return `${location.origin}/player?room=${encodeURIComponent(room)}`;
-  }
-
-  function updateShare() {
-    const link = buildPlayerLink();
-    const share = document.getElementById('shareUrl');
-    const qrCanvas = document.getElementById('qrCanvas');
-
-    if (share) share.value = link;
-    if (qrCanvas) {
-      QRCode.toCanvas(qrCanvas, link, { width: 128 }, function (error) {
-        if (error) console.error(error);
-      });
-    }
-  }
-
-  // копіювання
-  document.getElementById('copyLink')?.addEventListener('click', () => {
-    const share = document.getElementById('shareUrl');
-    share.select();
-    document.execCommand('copy');
-  });
-
-  // оновлювати при вводі кімнати + на старті
-  document.getElementById('hostRoom')?.addEventListener('input', updateShare);
-  document.addEventListener('DOMContentLoaded', updateShare);
-</script>
-  
   `);
 });
 
@@ -466,79 +450,89 @@ app.get("/host", (req, res) => {
 app.get("/player", (req, res) => {
   res.type("html").send(`<!doctype html><meta charset="utf-8"/>
   <title>Player • SparkSchool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>${baseCSS}</style>
-  <div class="grid-2">
-  <!-- PLAYER -->
-  <section class="card player-card">
-    <h3>Player</h3>
 
-    <div class="join-row">
-      <input id="room" placeholder="Кімната" />
-      <input id="user" placeholder="Ім’я" />
-      <button class="btn btn-primary" id="joinBtn">Join</button>
-    </div>
+  <div class="layout-player wrap">
+    <!-- PLAYER -->
+    <section class="card player-card">
+      <h3>Player</h3>
 
-    <p class="muted">Після Join чекайте на питання від вчителя…</p>
-  </section>
+      <div class="join-row">
+        <input id="room" placeholder="Кімната" />
+        <input id="user" placeholder="Ім’я" />
+        <button class="btn btn-primary" id="joinBtn">Join</button>
+      </div>
 
-  <!-- EVENTS -->
-  <section class="card events-card">
-    <h3>Події</h3>
-    <div id="playerLog" class="log-box"></div>
-    <h3 style="margin-top:10px">Бали</h3>
-    <div id="playerScore" class="card" style="min-height:56px"></div>
-  </section>
-</div>
+      <p class="muted" style="margin:8px 0 12px">Після Join чекайте на питання від вчителя…</p>
+
+      <!-- Сцена з питанням/варіантами -->
+      <div id="playerStage" class="card" style="padding:12px"></div>
+    </section>
+
+    <!-- EVENTS + SCORE -->
+    <section class="card events-card">
+      <h3>Події</h3>
+      <div id="playerLog" class="log-box"></div>
+      <h3 style="margin-top:10px">Бали</h3>
+      <div id="playerScore" class="card" style="min-height:56px"></div>
+    </section>
+  </div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const $ = (id)=>document.getElementById(id);
-    const log = (m)=>{$("log").innerHTML += m+"<br/>"; $("log").scrollTop=$("log").scrollHeight;}
-    const origin = location.origin.replace(/\\/$/,"");
+    const origin = location.origin.replace(/\\/$/,'');
     const socket = io(origin, { transports:["websocket","polling"] });
 
-    // room з хеша
-    const m = location.hash.match(/room=([^&]+)/);
-    if (m) $("room").value = decodeURIComponent(m[1]);
+    function log(m){
+      const box = $("playerLog");
+      box.innerHTML += m + "<br/>";
+      box.scrollTop = box.scrollHeight;
+    }
 
-    $("join").onclick = ()=>{
+    // room з query або hash
+    const qs = new URLSearchParams(location.search);
+    const qRoom = qs.get("room");
+    const h = location.hash.match(/room=([^&]+)/);
+    if (qRoom) $("room").value = qRoom; else if (h) $("room").value = decodeURIComponent(h[1]);
+
+    $("joinBtn").onclick = ()=>{
       const room = $("room").value.trim();
-      const name = $("name").value.trim() || "Student";
+      const name = $("user").value.trim() || "Student";
       if (!room) return alert("Введіть кімнату");
       socket.emit("player:join", { room, name });
       log("✓ Join " + room + " як " + name);
     };
 
     socket.on("question", ({question, choices, endsIn})=>{
-      $("stage").innerHTML = \`
+      $("playerStage").innerHTML = \`
         <div class="badge">Час: <span id="t">\${endsIn}</span> s</div>
-        <h2>\${question}</h2>
+        <h2 style="margin:8px 0 4px">\${question}</h2>
         <div class="choices">
           \${choices.map((c,i)=>'<button class="choice" data-i="'+i+'">'+c+'</button>').join('')}
         </div>
       \`;
       document.querySelectorAll('.choice').forEach(btn=>{
         btn.onclick = ()=>{
-          const idx = Number(btn.dataset.i);
-          socket.emit("player:answer", { idx });
-          btn.classList.add("choice","correct"); // візуальний фідбек
+          socket.emit("player:answer", { idx: Number(btn.dataset.i) });
+          btn.classList.add("correct"); // локальний фідбек
         };
       });
     });
 
     socket.on("tick",(sec)=>{ const t=$("t"); if(t) t.textContent=sec; });
-    socket.on("timeup",()=>{ log("⏰ Час вийшов"); });
+    socket.on("timeup",()=> log("⏰ Час вийшов"));
 
     socket.on("reveal", ({correct})=>{
-      const btns = document.querySelectorAll('.choice');
-      btns.forEach((b,i)=>{
+      document.querySelectorAll('.choice').forEach((b,i)=>{
         if (i===correct) b.classList.add('correct'); else b.classList.add('wrong');
       });
       log("✅ Правильна: " + correct);
     });
 
-    socket.on("scoreboard", (rows)=>{
-      $("score").innerHTML = rows.map(r=>\`
+    socket.on("scoreboard",(rows)=>{
+      $("playerScore").innerHTML = rows.map(r=>\`
         <div class="row"><div>\${r.name}</div><div style="text-align:right">\${r.score}</div></div>
       \`).join('');
     });
@@ -553,12 +547,13 @@ app.get("/player", (req, res) => {
 app.get("/screen", (req, res) => {
   res.type("html").send(`<!doctype html><meta charset="utf-8"/>
   <title>Screen • SparkSchool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>${baseCSS}</style>
   <div class="wrap">
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
         <h1 id="qq">Очікуємо на питання…</h1>
-        <div class="timer" id="tt">—</div>
+        <div class="badge" style="font-size:28px">⏱ <span id="tt">—</span></div>
       </div>
       <div id="choices" class="choices" style="grid-template-columns:1fr 1fr"></div>
     </div>
@@ -571,10 +566,9 @@ app.get("/screen", (req, res) => {
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const $ = (id)=>document.getElementById(id);
-    const origin = location.origin.replace(/\\/$/,"");
+    const origin = location.origin.replace(/\\/$/,'');
     const socket = io(origin, { transports:["websocket","polling"] });
 
-    // room з query (?room=class-1) або з hash (#room=)
     const params = new URLSearchParams(location.search);
     let room = params.get("room");
     if (!room) {
@@ -582,7 +576,6 @@ app.get("/screen", (req, res) => {
       if (m) room = decodeURIComponent(m[1]);
     }
     if (!room) room = "class-1";
-    // приєднаємось як "глядач" (просто join для presence/scoreboard)
     socket.emit("player:join", { room, name: "Screen" });
 
     socket.on("question", ({question, choices})=>{
@@ -607,7 +600,7 @@ app.get("/screen", (req, res) => {
 
 // Health & тест
 app.get("/healthz", (_req, res) => res.json({ ok: true, ts: Date.now() }));
-app.get("/test", (_req, res) => res.redirect("/player")); // старий /test → на player
+app.get("/test", (_req, res) => res.redirect("/player")); // старий /test → на /player
 
 // START
 const PORT = process.env.PORT || 3000;
