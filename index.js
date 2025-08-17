@@ -327,6 +327,31 @@ input,textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid 
 @media (max-width:540px){
   .panel .row-2{ grid-template-columns:1fr; }
 }
+/* ---- Шапка панелі вчителя (QR + керування) ---- */
+.toolbar{
+  display:grid;
+  grid-template-columns: 160px 1fr;
+  gap:16px;
+  align-items:flex-start;
+}
+.toolbar-qr{
+  width:160px; height:160px;
+  border-radius:12px; background:#fff;
+  justify-self:start;
+}
+
+/* поля/кнопки в шапці однакової ширини */
+.toolbar .row-2{ display:grid; grid-template-columns: 1fr auto; gap:10px; }
+.toolbar input{ width:100%; }
+.toolbar .btn{ white-space:nowrap; }
+
+/* Мобільний портрет: QR зверху, керування під ним */
+@media (max-width: 520px){
+  .toolbar{ grid-template-columns: 1fr; }
+  .toolbar-qr{ justify-self:center; }
+  .toolbar .row-2{ grid-template-columns: 1fr; }
+  .toolbar .btn{ width:100%; }
+}
 `;
 
 /* ===================== РОУТИ ===================== */
@@ -371,21 +396,21 @@ app.get("/host", (req, res) => {
       <h2>Панель вчителя</h2>
 
       <!-- верхній ряд: QR ліворуч, керування праворуч -->
-      <div class="row-2" style="align-items:flex-start; margin-top:12px">
-        <canvas id="qrCanvas" width="160" height="160" class="qr"></canvas>
+      <div class="toolbar" style="margin-top:12px">
+  <canvas id="qrCanvas" width="160" height="160" class="toolbar-qr"></canvas>
 
-        <div style="display:flex; flex-direction:column; gap:12px; width:100%">
-          <div class="row-2" style="gap:10px">
-            <input id="hostRoom" placeholder="Кімната" value="class-1" />
-            <button class="btn btn-primary" id="hostJoinBtn">Створити / Підключитись</button>
-          </div>
+  <div style="display:flex; flex-direction:column; gap:12px; width:100%">
+    <div class="row-2">
+      <input id="hostRoom" placeholder="Кімната" value="class-1" />
+      <button class="btn btn-primary" id="hostJoinBtn">Створити / Підключитись</button>
+    </div>
 
-          <div class="row-2" style="gap:10px">
-            <input id="shareUrl" type="text" readonly />
-            <button class="btn" id="copyLink">Копіювати</button>
-          </div>
-        </div>
-      </div>
+    <div class="row-2">
+      <input id="shareUrl" type="text" readonly />
+      <button class="btn" id="copyLink">Копіювати</button>
+    </div>
+  </div>
+</div>
 
       <!-- НОВЕ ПИТАННЯ — в тій самій картці нижче -->
       <h3 style="margin:18px 0 10px">Нове питання</h3>
