@@ -223,7 +223,6 @@ io.on("connection", (socket) => {
 });
 
 /* ===================== ГЛОБАЛЬНИЙ CSS ===================== */
-const baseCSS = `
 :root{
   --bg:#0f1226;--text:#e8eef6;--muted:#9fb3d8;
   --accent:#ffb300;--card:#171a34;--ok:#22c55e;--err:#ef4444
@@ -260,7 +259,7 @@ input,textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid 
 .player-card{order:1}
 .events-card{order:2}
 
-/* Мобільна портретна — все у стовпчик, події під формою */
+/* Мобільна портретна — все у стовпчик */
 @media (max-width:768px){
   .grid-2, .layout-host, .layout-player{grid-template-columns:1fr}
   .player-card{order:1}
@@ -275,13 +274,13 @@ input,textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid 
   body{font-size:15px}
   .log-box{font-size:12.5px}
 }
-/* === Combo row: input + button як один елемент === */
+/* === Combo row: input + button === */
 .combo{display:flex;gap:0;align-items:stretch}
 .combo input{
   height:48px;
   padding:0 12px;
   border-radius:10px 0 0 10px;
-  border-right:none;              /* знімаємо шов між полем і кнопкою */
+  border-right:none;
   margin:0;
 }
 .combo .btn,
@@ -293,7 +292,7 @@ input,textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid 
   padding:0 16px;
 }
 
-/* варіант для вузьких екранів — скласти в колонку */
+/* вузькі екрани — у стовпчик */
 @media (max-width:420px){
   .combo{flex-direction:column;gap:8px}
   .combo input{
@@ -305,15 +304,13 @@ input,textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid 
   .combo .btn-ghost{border-radius:10px}
 }
 
-/* дрібний косметичний тюнінг */
+/* дрібний тюнінг */
 .qrBox{flex:0 0 120px}
 .qrBox canvas{width:100%;height:auto;max-width:120px;background:#fff;border-radius:8px;padding:4px}
-/* компактна форма без другої рамки */
 .form{display:flex;flex-direction:column;gap:10px}
 .row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media (max-width:540px){.row-2{grid-template-columns:1fr}}
 
-/* Внутрішня панель у картці (делікатна рамка) */
 .panel{
   border:1px solid rgba(255,255,255,.12);
   background:rgba(10,12,24,.45);
@@ -327,32 +324,36 @@ input,textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid 
 @media (max-width:540px){
   .panel .row-2{ grid-template-columns:1fr; }
 }
+
 /* ---- Шапка панелі вчителя (QR + керування) ---- */
-.toolbar{
-  display:grid;
-  grid-template-columns: 160px 1fr;
-  gap:16px;
-  align-items:flex-start;
+.toolbar {
+  display: grid;
+  grid-template-columns: 140px 1fr; /* QR ліворуч, керування справа */
+  gap: 16px;
+  align-items: flex-start;
 }
-.toolbar-qr{
-  width:160px; height:160px;
-  border-radius:12px; background:#fff;
-  justify-self:start;
+.toolbar-qr {
+  width: 140px;
+  height: 140px;
+  border-radius: 12px;
+  background: #fff;
+  justify-self: start;
 }
+.toolbar .row-2 {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+}
+.toolbar input { width: 100%; }
+.toolbar .btn { white-space: nowrap; }
 
-/* поля/кнопки в шапці однакової ширини */
-.toolbar .row-2{ display:grid; grid-template-columns: 1fr auto; gap:10px; }
-.toolbar input{ width:100%; }
-.toolbar .btn{ white-space:nowrap; }
-
-/* Мобільний портрет: QR зверху, керування під ним */
-@media (max-width: 520px){
-  .toolbar{ grid-template-columns: 1fr; }
-  .toolbar-qr{ justify-self:center; }
-  .toolbar .row-2{ grid-template-columns: 1fr; }
-  .toolbar .btn{ width:100%; }
+/* Стек лише на дуже вузьких телефонах */
+@media (max-width: 360px) {
+  .toolbar { grid-template-columns: 1fr; }
+  .toolbar-qr { justify-self: center; width: 120px; height: 120px; }
+  .toolbar .row-2 { grid-template-columns: 1fr; }
+  .toolbar .btn { width: 100%; }
 }
-`;
 
 /* ===================== РОУТИ ===================== */
 
@@ -395,8 +396,8 @@ app.get("/host", (req, res) => {
     <div class="card">
       <h2>Панель вчителя</h2>
 
-      <!-- верхній ряд: QR ліворуч, керування праворуч -->
-      <div class="toolbar" style="margin-top:12px">
+      <!-- верхній ряд: QR ліворуч, керування справа -->
+<div class="toolbar" style="margin-top:12px">
   <canvas id="qrCanvas" width="160" height="160" class="toolbar-qr"></canvas>
 
   <div style="display:flex; flex-direction:column; gap:12px; width:100%">
