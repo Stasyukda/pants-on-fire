@@ -244,6 +244,33 @@ input,textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid 
 .score{display:flex;flex-direction:column;gap:6px}
 .score .row{grid-template-columns:1fr 60px}
 .qr{background:#fff;border-radius:12px;padding:6px}
+/* ====== Mobile-first покращення ====== */
+.card{background:rgba(20,26,48,.6);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap}
+.btn-row>*{height:44px}
+.join-row{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center}
+.share-link{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+.share-link input[type="text"]{flex:1 1 260px;min-width:0}
+.log-box{min-height:160px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;font-size:13px;line-height:1.35;white-space:pre-wrap;background:rgba(10,12,24,.55);border:1px dashed rgba(255,255,255,.12);border-radius:12px;padding:12px;overflow:auto}
+.actions-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+
+/* Портрет ≤768px */
+@media (max-width:768px){
+  .grid-2{grid-template-columns:1fr}
+  .player-card{order:1}
+  .events-card{order:2}
+  .join-row{grid-template-columns:1fr}
+  .btn,.btn-primary,.btn-ghost{width:100%}
+  .actions-3{grid-template-columns:1fr}
+  .share-link{flex-direction:column;align-items:stretch}
+  h2,h3{font-size:18px}
+}
+/* Дуже вузькі */
+@media (max-width:380px){
+  body{font-size:15px}
+  .log-box{font-size:12.5px}
+}
 `;
 
 // Домашня
@@ -278,53 +305,62 @@ app.get("/host", (req, res) => {
   res.type("html").send(`<!doctype html><meta charset="utf-8"/>
   <title>Host • SparkSchool</title>
   <style>${baseCSS}</style>
-  <div class="wrap grid grid-2">
-    <section class="card">
-      <h1>Host панель</h1>
-      <div class="row">
-        <div><label>Кімната</label><input id="room" value="class-1"/></div>
-        <div><label>&nbsp;</label><button id="create" class="btn">Створити / Підключитись</button></div>
-        <div style="display:flex;align-items:end;gap:.5rem">
-          <span class="badge">Лінк: <code id="deeplink">—</code></span>
-        </div>
+  <div class="grid-2">
+  <!-- HOST панель -->
+  <section class="card">
+    <h3>Host панель</h3>
+
+    <div class="join-row">
+      <input id="hostRoom" placeholder="Кімната" value="class-1" />
+      <button class="btn btn-primary" id="hostJoinBtn">Створити / Підключитись</button>
+    </div>
+
+    <div class="share-link">
+      <span class="muted">Лінк:</span>
+      <input id="shareUrl" type="text" readonly value="https://game.sparkschool.online/player?room=class-1" />
+      <button class="btn btn-ghost" id="copyLink">Копіювати</button>
+    </div>
+
+    <div style="margin-top:12px">
+      <canvas id="qrCanvas" width="128" height="128" style="background:#fff;border-radius:8px"></canvas>
+    </div>
+
+    <h3 style="margin-top:16px">Нове питання</h3>
+    <div class="card" style="padding:12px">
+      <input id="qText" placeholder="Питання (напр.: Як перекладається слово lightning?)" />
+      <div class="btn-row" style="margin-top:10px">
+        <input id="optA" placeholder="Варіант A" />
+        <input id="optB" placeholder="Варіант B" />
       </div>
-      <div style="margin-top:8px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-        <img id="qr" class="qr" width="120" height="120" alt="QR"/>
-        <small class="muted">Дайте учням: <b>/player</b> або QR → однакова кімната</small>
+      <div class="btn-row" style="margin-top:10px">
+        <input id="optC" placeholder="Варіант C" />
+        <input id="optD" placeholder="Варіант D" />
+      </div>
+      <div class="btn-row" style="margin-top:10px">
+        <input id="right" placeholder="Правильна (0-3)" />
+        <input id="time" inputmode="numeric" pattern="\d*" placeholder="Таймер (сек)" value="20" />
       </div>
 
-      <hr style="opacity:.15;margin:16px 0"/>
-
-      <h3>Нове питання</h3>
-      <label>Питання</label>
-      <textarea id="q" rows="2" placeholder="Наприклад: Як перекладається слово lightning?"></textarea>
-      <div class="grid" style="grid-template-columns:1fr 1fr">
-        <div><label>Варіант А</label><input id="c0" value="блискавка"/></div>
-        <div><label>Варіант B</label><input id="c1" value="гром"/></div>
-        <div><label>Варіант C</label><input id="c2" value="дощ"/></div>
-        <div><label>Варіант D</label><input id="c3" value="вітер"/></div>
+      <div class="actions-3" style="margin-top:12px">
+        <button class="btn btn-primary" id="btnStart">Start</button>
+        <button class="btn" id="btnReveal">Reveal</button>
+        <button class="btn" id="btnNext">Next</button>
       </div>
-      <div class="row" style="margin-top:8px">
-        <div><label>Правильна (0-3)</label><input id="correct" value="0"/></div>
-        <div><label>Тривалість (сек)</label><input id="dur" value="20"/></div>
-        <div style="display:flex;align-items:end;gap:8px">
-          <button id="start" class="btn">Start</button>
-          <button id="reveal" class="btn sec">Reveal</button>
-          <button id="next" class="btn sec">Next</button>
-        </div>
-      </div>
-    </section>
+    </div>
+  </section>
 
-    <aside class="card">
-      <h3>Стан</h3>
-      <div class="badge">Таймер: <span id="timer">—</span></div>
-      <div class="badge">Гравців: <span id="count">0</span></div>
-      <h4>Учасники</h4>
-      <ul id="people" class="list"></ul>
-      <h4>Події</h4>
-      <div id="log" class="log"></div>
-    </aside>
-  </div>
+  <!-- Стан/Події -->
+  <section class="card">
+    <h3>Стан</h3>
+    <div class="muted" id="hostState">Таймер: 0 • Гравців: 0</div>
+
+    <h3 style="margin-top:10px">Учасники</h3>
+    <ul id="hostUsers" class="card" style="min-height:56px; padding:8px"></ul>
+
+    <h3 style="margin-top:10px">Події</h3>
+    <div id="hostLog" class="log-box"></div>
+  </section>
+</div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
@@ -385,26 +421,28 @@ app.get("/player", (req, res) => {
   res.type("html").send(`<!doctype html><meta charset="utf-8"/>
   <title>Player • SparkSchool</title>
   <style>${baseCSS}</style>
-  <div class="wrap grid grid-2">
-    <section class="card">
-      <h1>Player</h1>
-      <div class="row">
-        <div><label>Кімната</label><input id="room" value="class-1"/></div>
-        <div><label>Ім'я</label><input id="name" value="Student"/></div>
-        <div style="display:flex;align-items:end"><button id="join" class="btn">Join</button></div>
-      </div>
-      <div id="stage" style="margin-top:12px">
-        <p class="muted">Після Join чекайте на питання від вчителя…</p>
-      </div>
-    </section>
+  <div class="grid-2">
+  <!-- PLAYER -->
+  <section class="card player-card">
+    <h3>Player</h3>
 
-    <aside class="card">
-      <h3>Події</h3>
-      <div id="log" class="log"></div>
-      <h3>Бали</h3>
-      <div id="score" class="score"></div>
-    </aside>
-  </div>
+    <div class="join-row">
+      <input id="room" placeholder="Кімната" />
+      <input id="user" placeholder="Ім’я" />
+      <button class="btn btn-primary" id="joinBtn">Join</button>
+    </div>
+
+    <p class="muted">Після Join чекайте на питання від вчителя…</p>
+  </section>
+
+  <!-- EVENTS -->
+  <section class="card events-card">
+    <h3>Події</h3>
+    <div id="playerLog" class="log-box"></div>
+    <h3 style="margin-top:10px">Бали</h3>
+    <div id="playerScore" class="card" style="min-height:56px"></div>
+  </section>
+</div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
