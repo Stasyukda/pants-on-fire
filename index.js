@@ -326,33 +326,39 @@ input,textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid 
 }
 
 /* ---- Шапка панелі вчителя (QR + керування) ---- */
-.toolbar {
-  display: grid;
-  grid-template-columns: 140px 1fr; /* QR ліворуч, керування справа */
-  gap: 16px;
-  align-items: flex-start;
+/* ---- Шапка панелі вчителя (QR + керування) ---- */
+.toolbar{
+  display:grid;
+  grid-template-columns: 120px 1fr;  /* було 160px */
+  gap:16px;
+  align-items:flex-start;
 }
-.toolbar-qr {
-  width: 140px;
-  height: 140px;
-  border-radius: 12px;
-  background: #fff;
-  justify-self: start;
+.toolbar-qr{
+  width:120px; height:120px;        /* було 160px */
+  border-radius:12px; background:#fff;
+  justify-self:start;
 }
-.toolbar .row-2 {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 10px;
-}
-.toolbar input { width: 100%; }
-.toolbar .btn { white-space: nowrap; }
 
-/* Стек лише на дуже вузьких телефонах */
-@media (max-width: 360px) {
-  .toolbar { grid-template-columns: 1fr; }
-  .toolbar-qr { justify-self: center; width: 120px; height: 120px; }
-  .toolbar .row-2 { grid-template-columns: 1fr; }
-  .toolbar .btn { width: 100%; }
+/* рядки праворуч: поле тягнеться, кнопка — авто */
+.toolbar .row-2{ display:grid; grid-template-columns: 1fr auto; gap:10px; }
+.toolbar input{ width:100%; }
+.toolbar .btn{ white-space:nowrap; }
+
+/* !!! ВАЖЛИВО: прибираємо правило, яке складало все в колонку на телефонах
+@media (max-width: 520px){
+  .toolbar{ grid-template-columns: 1fr; }
+  .toolbar-qr{ justify-self:center; }
+  .toolbar .row-2{ grid-template-columns: 1fr; }
+  .toolbar .btn{ width:100%; }
+}
+*/
+
+/* Якщо хочеш все ж складати В КОЛОНКУ тільки на дуже вузьких трубках: */
+@media (max-width: 360px){
+  .toolbar{ grid-template-columns: 1fr; }
+  .toolbar-qr{ justify-self:center; width:100px; height:100px; }
+  .toolbar .row-2{ grid-template-columns: 1fr; }
+  .toolbar .btn{ width:100%; }
 }
 
 /* ===================== РОУТИ ===================== */
