@@ -311,7 +311,23 @@ input,textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid 
 /* компактна форма без другої рамки */
 .form{display:flex;flex-direction:column;gap:10px}
 .row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media (max-width:540px){.row-2{grid-template-columns:1fr}}`;
+@media (max-width:540px){.row-2{grid-template-columns:1fr}}
+
+/* Внутрішня панель у картці (делікатна рамка) */
+.panel{
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(10,12,24,.45);
+  border-radius:12px;
+  padding:12px;
+  margin-top:12px;
+}
+.panel h3{ margin:0 0 10px; }
+.panel .form{ display:flex; flex-direction:column; gap:10px; }
+.panel .row-2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+@media (max-width:540px){
+  .panel .row-2{ grid-template-columns:1fr; }
+}
+`;
 
 /* ===================== РОУТИ ===================== */
 
@@ -382,25 +398,27 @@ app.get("/host", (_req, res) => {
 
       <div style="margin-top:12px">
 
-      <h3 class="section-title" style="margin-top:16px">Нове питання</h3>
-<div class="form">
-  <input id="qText" placeholder="Питання (напр.: Як перекладається слово lightning?)" />
-  <div class="row-2">
-    <input id="optA" placeholder="Варіант A" />
-    <input id="optB" placeholder="Варіант B" />
-  </div>
-  <div class="row-2">
-    <input id="optC" placeholder="Варіант C" />
-    <input id="optD" placeholder="Варіант D" />
-  </div>
-  <div class="row-2">
-    <input id="right" placeholder="Правильна (0-3)" />
-    <input id="time" inputmode="numeric" pattern="\d*" placeholder="Таймер (сек)" value="20" />
-  </div>
-  <div class="actions-3">
-    <button class="btn btn-primary" id="btnStart">Start</button>
-    <button class="btn" id="btnReveal">Reveal</button>
-    <button class="btn" id="btnNext">Next</button>
+      <h3 style="margin-top:16px">Нове питання</h3>
+<div class="panel">
+  <div class="form">
+    <input id="qText" placeholder="Питання (напр.: Як перекладається слово lightning?)" />
+    <div class="row-2">
+      <input id="optA" placeholder="Варіант A" />
+      <input id="optB" placeholder="Варіант B" />
+    </div>
+    <div class="row-2">
+      <input id="optC" placeholder="Варіант C" />
+      <input id="optD" placeholder="Варіант D" />
+    </div>
+    <div class="row-2">
+      <input id="right" placeholder="Правильна (0-3)" />
+      <input id="time" inputmode="numeric" pattern="\d*" placeholder="Таймер (сек)" value="20" />
+    </div>
+    <div class="actions-3" style="margin-top:6px">
+      <button class="btn btn-primary" id="btnStart">Start</button>
+      <button class="btn" id="btnReveal">Reveal</button>
+      <button class="btn" id="btnNext">Next</button>
+    </div>
   </div>
 </div>
     </section>
