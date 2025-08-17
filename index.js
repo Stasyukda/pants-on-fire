@@ -275,6 +275,39 @@ input,textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid 
   body{font-size:15px}
   .log-box{font-size:12.5px}
 }
+/* === Combo row: input + button як один елемент === */
+.combo{display:flex;gap:0;align-items:stretch}
+.combo input{
+  height:48px;
+  padding:0 12px;
+  border-radius:10px 0 0 10px;
+  border-right:none;              /* знімаємо шов між полем і кнопкою */
+  margin:0;
+}
+.combo .btn,
+.combo .btn-primary,
+.combo .btn-ghost{
+  height:48px;
+  border-radius:0 10px 10px 0;
+  white-space:nowrap;
+  padding:0 16px;
+}
+
+/* варіант для вузьких екранів — скласти в колонку */
+@media (max-width:420px){
+  .combo{flex-direction:column;gap:8px}
+  .combo input{
+    border-right:1px solid rgba(255,255,255,.14);
+    border-radius:10px;
+  }
+  .combo .btn,
+  .combo .btn-primary,
+  .combo .btn-ghost{border-radius:10px}
+}
+
+/* дрібний косметичний тюнінг */
+.qrBox{flex:0 0 120px}
+.qrBox canvas{width:100%;height:auto;max-width:120px;background:#fff;border-radius:8px;padding:4px}
 `;
 
 /* ===================== РОУТИ ===================== */
@@ -315,41 +348,31 @@ app.get("/host", (_req, res) => {
   <style>${baseCSS}</style>
 
   <!-- HOST панель -->
-<section class="card" style="margin:16px; padding:16px;">
+<section style="margin:16px 16px 0; padding:0;">
+  <h3 style="margin:0 0 12px">Host панель</h3>
 
-  <h3 style="margin-bottom:12px;">Host панель</h3>
-
-  <div class="host-panel" 
-       style="display:flex; gap:16px; align-items:flex-start;">
-
-    <!-- QR-код зліва -->
-    <div style="flex:0 0 120px; display:flex; 
-                align-items:center; justify-content:center;">
-      <canvas id="qrCanvas" 
-              style="width:100%; height:auto; max-width:120px; 
-                     background:#fff; border-radius:8px; padding:4px;">
-      </canvas>
+  <div style="display:flex; gap:16px; align-items:flex-start">
+    <!-- QR зліва -->
+    <div class="qrBox">
+      <canvas id="qrCanvas"></canvas>
     </div>
 
-    <!-- Панель справа -->
-    <div style="flex:1; display:flex; flex-direction:column; gap:12px;">
+    <!-- Праворуч: по два combo-ряди -->
+    <div style="flex:1; display:flex; flex-direction:column; gap:12px">
 
-      <div class="join-row" style="display:flex; gap:8px;">
-        <input id="hostRoom" placeholder="Кімната" value="class-1"
-               style="flex:1; padding:8px; border-radius:6px;" />
-        <button class="btn btn-primary" id="hostJoinBtn">
-          Створити / Підключитись
-        </button>
+      <!-- Ряд 1: Клас + Створити/Підключитись -->
+      <div class="combo">
+        <input id="hostRoom" placeholder="Кімната" value="class-1"/>
+        <button class="btn btn-primary" id="hostJoinBtn">Створити / Підключитись</button>
       </div>
 
-      <div class="share-link" style="display:flex; gap:8px; align-items:center;">
-        <span class="muted">Лінк:</span>
+      <!-- Ряд 2: Лінк + Копіювати (без заголовка "Лінк") -->
+      <div class="combo">
         <input id="shareUrl" type="text" readonly
-               value="https://game.sparkschool.online/player?room=class-1"
-               style="flex:1; padding:8px; border-radius:6px; 
-                      overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" />
+               value="https://game.sparkschool.online/player?room=class-1"/>
         <button class="btn btn-ghost" id="copyLink">Копіювати</button>
       </div>
+
     </div>
   </div>
 </section>
