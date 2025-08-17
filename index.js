@@ -308,7 +308,10 @@ input,textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid 
 /* дрібний косметичний тюнінг */
 .qrBox{flex:0 0 120px}
 .qrBox canvas{width:100%;height:auto;max-width:120px;background:#fff;border-radius:8px;padding:4px}
-`;
+/* компактна форма без другої рамки */
+.form{display:flex;flex-direction:column;gap:10px}
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:540px){.row-2{grid-template-columns:1fr}}`;
 
 /* ===================== РОУТИ ===================== */
 
@@ -349,7 +352,7 @@ app.get("/host", (_req, res) => {
 
   <!-- HOST панель -->
 <section style="margin:16px 16px 0; padding:0;">
-  <h3 style="margin:0 0 12px">Host панель</h3>
+  <h3 style="margin:0 0 12px">Панель вчителя</h3>
 
   <div style="display:flex; gap:16px; align-items:flex-start">
     <!-- QR зліва -->
@@ -379,28 +382,27 @@ app.get("/host", (_req, res) => {
 
       <div style="margin-top:12px">
 
-      <h3 style="margin-top:16px">Нове питання</h3>
-      <div class="card" style="padding:12px">
-        <input id="qText" placeholder="Питання (напр.: Як перекладається слово lightning?)" />
-        <div class="btn-row" style="margin-top:10px">
-          <input id="optA" placeholder="Варіант A" />
-          <input id="optB" placeholder="Варіант B" />
-        </div>
-        <div class="btn-row" style="margin-top:10px">
-          <input id="optC" placeholder="Варіант C" />
-          <input id="optD" placeholder="Варіант D" />
-        </div>
-        <div class="btn-row" style="margin-top:10px">
-          <input id="right" placeholder="Правильна (0-3)" />
-          <input id="time" inputmode="numeric" pattern="\\d*" placeholder="Таймер (сек)" value="20" />
-        </div>
-
-        <div class="actions-3" style="margin-top:12px">
-          <button class="btn btn-primary" id="btnStart">Start</button>
-          <button class="btn" id="btnReveal">Reveal</button>
-          <button class="btn" id="btnNext">Next</button>
-        </div>
-      </div>
+      <h3 class="section-title" style="margin-top:16px">Нове питання</h3>
+<div class="form">
+  <input id="qText" placeholder="Питання (напр.: Як перекладається слово lightning?)" />
+  <div class="row-2">
+    <input id="optA" placeholder="Варіант A" />
+    <input id="optB" placeholder="Варіант B" />
+  </div>
+  <div class="row-2">
+    <input id="optC" placeholder="Варіант C" />
+    <input id="optD" placeholder="Варіант D" />
+  </div>
+  <div class="row-2">
+    <input id="right" placeholder="Правильна (0-3)" />
+    <input id="time" inputmode="numeric" pattern="\d*" placeholder="Таймер (сек)" value="20" />
+  </div>
+  <div class="actions-3">
+    <button class="btn btn-primary" id="btnStart">Start</button>
+    <button class="btn" id="btnReveal">Reveal</button>
+    <button class="btn" id="btnNext">Next</button>
+  </div>
+</div>
     </section>
 
     <!-- Стан/Події -->
