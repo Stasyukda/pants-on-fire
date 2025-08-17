@@ -314,33 +314,39 @@ app.get("/host", (_req, res) => {
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>${baseCSS}</style>
 
-  <div class="layout-host wrap" style="max-width:1100px">
-    <!-- HOST панель -->
-    <section class="card">
-      <h3>Host панель</h3>
+  <div class="host-panel" 
+     style="display:flex; gap:20px; align-items:stretch; margin-top:16px;">
 
-      <div class="join-row" style="margin-top:8px">
-        <input id="hostRoom" placeholder="Кімната" value="class-1" />
-        <button class="btn btn-primary" id="hostJoinBtn">Створити / Підключитись</button>
-      </div>
+  <!-- QR-код зліва -->
+  <div style="flex:0 0 140px; display:flex; align-items:center; justify-content:center;">
+    <canvas id="qrCanvas" 
+            style="width:100%; height:100%; max-width:140px; max-height:140px; 
+                   background:#fff; border-radius:8px;">
+    </canvas>
+  </div>
 
-      <div class="share-link" 
-     style="display:flex; align-items:center; gap:8px; margin-top:8px;">
+  <!-- Панель справа -->
+  <div style="flex:1; display:flex; flex-direction:column; gap:12px;">
 
-  <span class="muted" style="white-space:nowrap;">Лінк:</span>
+    <div class="join-row" style="display:flex; gap:8px;">
+      <input id="hostRoom" placeholder="Кімната" value="class-1" 
+             style="flex:1; padding:6px; border-radius:4px;" />
+      <button class="btn btn-primary" id="hostJoinBtn">
+        Створити / Підключитись
+      </button>
+    </div>
 
-  <input id="shareUrl" 
-         type="text" 
-         readonly 
-         value="https://game.sparkschool.online/player?room=class-1"
-         style="flex:1; height:32px; font-size:14px; padding:4px; border-radius:4px; 
-                overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" />
+    <div class="share-link" 
+         style="display:flex; align-items:center; gap:8px;">
+      <span class="muted">Лінк:</span>
+      <input id="shareUrl" type="text" readonly
+             value="https://game.sparkschool.online/player?room=class-1"
+             style="flex:1; padding:6px; border-radius:4px; 
+                    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" />
+      <button class="btn btn-ghost" id="copyLink">Копіювати</button>
+    </div>
 
-  <button class="btn btn-ghost" 
-          id="copyLink" 
-          style="height:32px; white-space:nowrap;">
-    Копіювати
-  </button>
+  </div>
 </div>
 
       <div style="margin-top:12px">
