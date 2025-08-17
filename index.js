@@ -398,7 +398,7 @@ app.get("/host", (_req, res) => {
 
       <div style="margin-top:12px">
 
-      <h3 style="margin-top:16px">Нове питання</h3>
+      <h3 style="margin:0 0 12px">Нове питання</h3>
 <div class="panel">
   <div class="form">
     <input id="qText" placeholder="Питання (напр.: Як перекладається слово lightning?)" />
