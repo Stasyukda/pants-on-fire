@@ -221,8 +221,7 @@ io.on("connection", (socket) => {
     }
   });
 });
-
-/* ===================== ГЛОБАЛЬНИЙ CSS ===================== */
+const baseCSS = `
 :root{
   --bg:#0f1226;--text:#e8eef6;--muted:#9fb3d8;
   --accent:#ffb300;--card:#171a34;--ok:#22c55e;--err:#ef4444
@@ -231,22 +230,29 @@ io.on("connection", (socket) => {
 body{margin:0;background:radial-gradient(1200px 800px at 80% -10%,#2a2f63 0%,rgba(15,18,38,.6) 60%),var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif}
 .wrap{max-width:1000px;margin:32px auto;padding:16px}
 .card{background:rgba(20,26,48,.6);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
-h1,h2,h3{margin:0 0 10px 0} .muted{color:var(--muted)}
+h1,h2,h3{margin:0 0 10px 0}
+.muted{color:var(--muted)}
+
 .grid{display:grid;gap:16px}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media(min-width:860px){.grid-2.wide-cols{grid-template-columns:1.2fr .8fr}}
+
 label{font-size:.85rem;color:var(--muted)}
 input,textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:#0b1220;color:#fff}
+
 .btn{padding:.7rem 1rem;border:0;border-radius:12px;background:linear-gradient(135deg,#ffb300,#ff6f00);color:#1b1200;font-weight:800;cursor:pointer}
 .btn.btn-primary{background:linear-gradient(135deg,#ffb300,#ff6f00)}
 .btn.btn-ghost{background:rgba(255,255,255,.08);color:#fff}
 .btn.sec{background:#0ea5e9;color:#001018}
+
 .badge{display:inline-flex;gap:.5rem;align-items:center;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);padding:.35rem .6rem;border-radius:999px;color:var(--muted)}
 .log-box{min-height:160px;font-family:ui-monospace,Consolas,monospace;font-size:13px;line-height:1.35;white-space:pre-wrap;background:rgba(10,12,24,.55);border:1px dashed rgba(255,255,255,.12);border-radius:12px;padding:12px;overflow:auto}
+
 .choices{display:grid;gap:10px;margin-top:12px}
 .choice{border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:12px;background:#0b1220;cursor:pointer}
 .choice.correct{outline:2px solid var(--ok)}
 .choice.wrong{opacity:.5}
+
 .score{display:flex;flex-direction:column;gap:6px}
 .row{display:grid;gap:12px;grid-template-columns:1fr 60px}
 .btn-row{display:flex;gap:10px;flex-wrap:wrap}
@@ -255,13 +261,13 @@ input,textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid 
 .share-link{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
 .share-link input[type="text"]{flex:1 1 260px;min-width:0}
 
-.layout-host, .layout-player{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.layout-host,.layout-player{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .player-card{order:1}
 .events-card{order:2}
 
 /* Мобільна портретна — все у стовпчик */
 @media (max-width:768px){
-  .grid-2, .layout-host, .layout-player{grid-template-columns:1fr}
+  .grid-2,.layout-host,.layout-player{grid-template-columns:1fr}
   .player-card{order:1}
   .events-card{order:2}
   .join-row{grid-template-columns:1fr}
@@ -274,93 +280,46 @@ input,textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid 
   body{font-size:15px}
   .log-box{font-size:12.5px}
 }
-/* === Combo row: input + button === */
-.combo{display:flex;gap:0;align-items:stretch}
-.combo input{
-  height:48px;
-  padding:0 12px;
-  border-radius:10px 0 0 10px;
-  border-right:none;
-  margin:0;
-}
-.combo .btn,
-.combo .btn-primary,
-.combo .btn-ghost{
-  height:48px;
-  border-radius:0 10px 10px 0;
-  white-space:nowrap;
-  padding:0 16px;
-}
 
-/* вузькі екрани — у стовпчик */
+/* Combo row: input + button */
+.combo{display:flex;gap:0;align-items:stretch}
+.combo input{height:48px;padding:0 12px;border-radius:10px 0 0 10px;border-right:none;margin:0}
+.combo .btn,.combo .btn-primary,.combo .btn-ghost{height:48px;border-radius:0 10px 10px 0;white-space:nowrap;padding:0 16px}
 @media (max-width:420px){
   .combo{flex-direction:column;gap:8px}
-  .combo input{
-    border-right:1px solid rgba(255,255,255,.14);
-    border-radius:10px;
-  }
-  .combo .btn,
-  .combo .btn-primary,
-  .combo .btn-ghost{border-radius:10px}
+  .combo input{border-right:1px solid rgba(255,255,255,.14);border-radius:10px}
+  .combo .btn,.combo .btn-primary,.combo .btn-ghost{border-radius:10px}
 }
 
-/* дрібний тюнінг */
+/* Дрібний тюнінг */
 .qrBox{flex:0 0 120px}
 .qrBox canvas{width:100%;height:auto;max-width:120px;background:#fff;border-radius:8px;padding:4px}
 .form{display:flex;flex-direction:column;gap:10px}
 .row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media (max-width:540px){.row-2{grid-template-columns:1fr}}
 
-.panel{
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(10,12,24,.45);
-  border-radius:12px;
-  padding:12px;
-  margin-top:12px;
-}
-.panel h3{ margin:0 0 10px; }
-.panel .form{ display:flex; flex-direction:column; gap:10px; }
-.panel .row-2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-@media (max-width:540px){
-  .panel .row-2{ grid-template-columns:1fr; }
-}
+/* Внутрішня панель */
+.panel{border:1px solid rgba(255,255,255,.12);background:rgba(10,12,24,.45);border-radius:12px;padding:12px;margin-top:12px}
+.panel h3{margin:0 0 10px}
+.panel .form{display:flex;flex-direction:column;gap:10px}
+.panel .row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:540px){.panel .row-2{grid-template-columns:1fr}}
 
 /* ---- Шапка панелі вчителя (QR + керування) ---- */
-/* ---- Шапка панелі вчителя (QR + керування) ---- */
-.toolbar{
-  display:grid;
-  grid-template-columns: 120px 1fr;  /* було 160px */
-  gap:16px;
-  align-items:flex-start;
-}
-.toolbar-qr{
-  width:120px; height:120px;        /* було 160px */
-  border-radius:12px; background:#fff;
-  justify-self:start;
-}
+.toolbar{display:grid;grid-template-columns:140px 1fr;gap:16px;align-items:flex-start}
+.toolbar-qr{width:140px;height:140px;border-radius:12px;background:#fff;justify-self:start}
+.toolbar .row-2{display:grid;grid-template-columns:1fr auto;gap:10px}
+.toolbar input{width:100%}
+.toolbar .btn{white-space:nowrap}
 
-/* рядки праворуч: поле тягнеться, кнопка — авто */
-.toolbar .row-2{ display:grid; grid-template-columns: 1fr auto; gap:10px; }
-.toolbar input{ width:100%; }
-.toolbar .btn{ white-space:nowrap; }
-
-/* !!! ВАЖЛИВО: прибираємо правило, яке складало все в колонку на телефонах
-@media (max-width: 520px){
-  .toolbar{ grid-template-columns: 1fr; }
-  .toolbar-qr{ justify-self:center; }
-  .toolbar .row-2{ grid-template-columns: 1fr; }
-  .toolbar .btn{ width:100%; }
+/* Стек лише на дуже вузьких телефонах */
+@media (max-width:360px){
+  .toolbar{grid-template-columns:1fr}
+  .toolbar-qr{justify-self:center;width:120px;height:120px}
+  .toolbar .row-2{grid-template-columns:1fr}
+  .toolbar .btn{width:100%}
 }
-*/
-
-/* Якщо хочеш все ж складати В КОЛОНКУ тільки на дуже вузьких трубках: */
-@media (max-width: 360px){
-  .toolbar{ grid-template-columns: 1fr; }
-  .toolbar-qr{ justify-self:center; width:100px; height:100px; }
-  .toolbar .row-2{ grid-template-columns: 1fr; }
-  .toolbar .btn{ width:100%; }
-}
-
+`;
 /* ===================== РОУТИ ===================== */
 
 // Домашня
