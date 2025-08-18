@@ -319,6 +319,42 @@ input,textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid 
   .toolbar .row-2{grid-template-columns:1fr}
   .toolbar .btn{width:100%}
 }
+/* Карточки трохи просторіші всередині, щоб справа був відступ */
+.card{background:rgba(20,26,48,.6);border:1px solid rgba(255,255,255,.06);
+      border-radius:14px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+
+/* внутрішня панель з рівними відступами */
+.panel{border:1px solid rgba(255,255,255,.12);background:rgba(10,12,24,.45);
+       border-radius:12px;padding:16px;margin-top:12px}
+
+/* ---- toolbar ---- */
+.toolbar{
+  display:grid;
+  grid-template-columns:140px minmax(0,1fr);   /* QR + гнучка права частина */
+  gap:16px;
+  align-items:flex-start;
+}
+.toolbar-qr{
+  width:140px;height:140px;border-radius:12px;background:#fff;justify-self:start;
+}
+.toolbar-right{display:flex;flex-direction:column;gap:12px}
+
+/* рядок поля + кнопки: поле тягнеться, кнопка – авто */
+.toolbar-right .row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px}
+.toolbar-right input{width:100%}
+.toolbar-right .btn{white-space:nowrap}
+
+/* На дуже вузьких телефонах — скласти у стовпчик */
+@media (max-width:360px){
+  .toolbar{grid-template-columns:1fr}
+  .toolbar-qr{justify-self:center;width:120px;height:120px}
+  .toolbar-right .row{grid-template-columns:1fr}
+  .toolbar-right .btn{width:100%}
+}
+.home-links{display:flex;flex-wrap:wrap;gap:10px}
+.home-links a{flex:1 1 180px;text-align:center}
+/* наприклад, щоб кнопку було трохи ширше за поле */
+.toolbar-right .row:nth-child(2){grid-template-columns:minmax(0,0.8fr) auto}
 `;
 /* ===================== РОУТИ ===================== */
 
@@ -333,9 +369,11 @@ app.get("/", (_req, res) => {
       <h1>⚡ SparkSchool • Quiz MVP</h1>
       <p class="muted">Оберіть екран:</p>
       <p>
-        <a class="btn" href="/host">Host (вчитель)</a>
-        <a class="btn sec" href="/player">Player (учень)</a>
-        <a class="btn sec" href="/screen">Screen (проектор)</a>
+        <div class="home-links">
+  <a class="btn" href="/host">Host (вчитель)</a>
+  <a class="btn sec" href="/player">Player (учень)</a>
+  <a class="btn sec" href="/screen">Screen (проектор)</a>
+        </div>
       </p>
     </section>
     <section class="card">
@@ -363,21 +401,21 @@ app.get("/host", (req, res) => {
     <h2>Панель вчителя</h2>
 
     <!-- Шапка: QR + керування -->
-    <div class="toolbar" style="margin-top:12px">
-      <canvas id="qrCanvas" width="140" height="140" class="toolbar-qr"></canvas>
+    <div class="toolbar">
+  <canvas id="qrCanvas" width="140" height="140" class="toolbar-qr"></canvas>
 
-      <div style="display:flex; flex-direction:column; gap:12px; width:100%">
-        <div class="row-2">
-          <input id="hostRoom" placeholder="Кімната" value="class-1"/>
-          <button class="btn btn-primary" id="hostJoinBtn">Створити / Підключитись</button>
-        </div>
-
-        <div class="row-2">
-          <input id="shareUrl" type="text" readonly/>
-          <button class="btn" id="copyLink">Копіювати</button>
-        </div>
-      </div>
+  <div class="toolbar-right">
+    <div class="row">
+      <input id="hostRoom" placeholder="Кімната" value="class-1" />
+      <button class="btn btn-primary" id="hostJoinBtn">Створити / Підключитись</button>
     </div>
+
+    <div class="row">
+      <input id="shareUrl" type="text" readonly />
+      <button class="btn" id="copyLink">Копіювати</button>
+    </div>
+  </div>
+</div>
   </section>
 
   <!-- Нове питання -->
