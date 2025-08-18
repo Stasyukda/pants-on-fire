@@ -1,0 +1,202 @@
+/* ================================
+   ТЕМА (змінні кольорів)
+================================ */
+:root{
+  --bg:#0f1226;
+  --text:#e8eef6;
+  --muted:#9fb3d8;
+  --accent:#ffb300;
+  --card:#171a34;
+  --ok:#22c55e;
+  --err:#ef4444;
+}
+
+/* ================================
+   БАЗА / ТИПОГРАФІКА
+================================ */
+*{ box-sizing:border-box; }
+
+body{
+  margin:0;
+  background:
+    radial-gradient(1200px 800px at 80% -10%, #2a2f63 0%, rgba(15,18,38,.6) 60%),
+    var(--bg);
+  color:var(--text);
+  font-family:system-ui, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+h1,h2,h3{ margin:0 0 10px 0; }
+.muted{ color:var(--muted); }
+
+/* Обмежуємо ширину основного вмісту */
+.wrap{ max-width:1000px; margin:32px auto; padding:16px; }
+
+/* ================================
+   КАРТКИ/СЕКЦІЇ
+================================ */
+.card{
+  background:rgba(20,26,48,.6);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:14px;
+  padding:16px;
+  box-shadow:0 6px 18px rgba(0,0,0,.25);
+}
+
+/* Внутрішні секції в картці (рівні вертикальні відступи) */
+.card .section{ padding:12px 0; }
+.card .section + .section{ padding-top:16px; }
+
+/* ================================
+   СІТКИ/ЛЕЙАУТИ
+================================ */
+.grid{ display:grid; gap:16px; }
+
+/* Дві колонки (автоматично стануть в одну на мобільних) */
+.grid-2{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:16px;
+}
+
+/* Трохи інший баланс колонок для широких екранів */
+@media (min-width:860px){
+  .grid-2.wide-cols{ grid-template-columns:1.2fr .8fr; }
+}
+
+/* Лейаут для /player — події під формою на мобільному */
+.layout-host,.layout-player{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.player-card{ order:1; }
+.events-card{ order:2; }
+
+/* Мобільні: все в стовпчик, кнопки розтягуються на 100% */
+@media (max-width:768px){
+  .grid-2, .layout-host, .layout-player{ grid-template-columns:1fr; }
+  .player-card{ order:1; }
+  .events-card{ order:2; }
+  .btn, .btn.btn-primary, .btn.btn-ghost{ width:100%; }
+  h2,h3{ font-size:18px; }
+}
+
+/* Дуже вузькі телефони */
+@media (max-width:380px){
+  body{ font-size:15px; }
+}
+
+/* ================================
+   ФОРМИ/ПОЛЯ/КНОПКИ
+================================ */
+label{ font-size:.85rem; color:var(--muted); }
+
+/* Єдина висота полів, щоб усе виглядало рівно */
+input, textarea, select{
+  width:100%;
+  height:48px;                 /* ← вирівнює висоту варіантів A–D і всіх інпутів */
+  padding:10px 12px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.14);
+  background:#0b1220;
+  color:#fff;
+}
+
+/* Кнопки */
+.btn{
+  padding:.7rem 1rem;
+  border:0;
+  border-radius:12px;
+  background:linear-gradient(135deg,#ffb300,#ff6f00);
+  color:#1b1200;
+  font-weight:800;
+  cursor:pointer;
+}
+.btn.btn-primary{ background:linear-gradient(135deg,#ffb300,#ff6f00); }
+.btn.btn-ghost{ background:rgba(255,255,255,.08); color:#fff; }
+.btn.sec{ background:#0ea5e9; color:#001018; }
+
+/* Ряд на три кнопки (Start/Reveal/Next) */
+.actions-3{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+
+/* Списки/лог */
+.log-box{
+  min-height:160px;
+  font-family:ui-monospace, Consolas, monospace;
+  font-size:13px;
+  line-height:1.35;
+  white-space:pre-wrap;
+  background:rgba(10,12,24,.55);
+  border:1px dashed rgba(255,255,255,.12);
+  border-radius:12px;
+  padding:12px;
+  overflow:auto;
+}
+
+/* Варіанти відповідей (кнопки) */
+.choices{ display:grid; gap:10px; margin-top:12px; }
+.choice{
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:10px;
+  padding:12px;
+  background:#0b1220;
+  cursor:pointer;
+}
+.choice.correct{ outline:2px solid var(--ok); }
+.choice.wrong{ opacity:.5; }
+
+/* Таблиця балів */
+.score{ display:flex; flex-direction:column; gap:6px; }
+.row{ display:grid; gap:12px; grid-template-columns:1fr 60px; }
+
+/* ================================
+   ШАПКА ПАНЕЛІ ВЧИТЕЛЯ (QR + керування)
+================================ */
+/* Весь верхній блок: QR ліворуч, керування праворуч */
+.toolbar{
+  display:grid;
+  grid-template-columns: 140px 1fr; /* QR + правий стовпчик */
+  gap:12px;                         /* зменшений відступ між QR і керуванням */
+  align-items:flex-start;
+  padding-right:8px;                /* невеликий відступ від правого краю картки */
+}
+
+/* Сам квадрат з QR */
+.toolbar-qr{
+  width:140px;
+  height:140px;
+  border-radius:12px;
+  background:#fff;
+  justify-self:start;
+}
+
+/* Усередині правого стовпчика — кожен ряд (поле + кнопка) */
+.toolbar-row{
+  display:grid;
+  grid-template-columns:1fr;        /* ← поле над кнопкою (вертикально) */
+  gap:8px;                          /* проміжок між полем та кнопкою */
+}
+
+/* Поля та кнопки в шапці поводяться як і решта */
+.toolbar-row input{ width:100%; }
+.toolbar-row .btn{ white-space:nowrap; }
+
+/* Дуже вузькі телефони — QR зверху, керування під ним */
+@media (max-width:360px){
+  .toolbar{ grid-template-columns:1fr; }
+  .toolbar-qr{ justify-self:center; width:120px; height:120px; }
+}
+
+/* ================================
+   Домашні лінки як кнопки (/)
+================================ */
+.btn-link{
+  display:inline-block;
+  text-decoration:none;
+  color:#1b1200;
+  background:linear-gradient(135deg,#ffb300,#ff6f00);
+  padding:.7rem 1rem;
+  border-radius:12px;
+  font-weight:800;
+}
+.btn-link.sec{ background:#0ea5e9; color:#001018; }
