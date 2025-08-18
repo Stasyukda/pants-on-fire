@@ -292,7 +292,7 @@ app.get("/host", (req, res) => {
       <h2>Панель вчителя</h2>
 
       <!-- ВЕРХНІЙ БЛОК: QR + керування праворуч -->
-      <div class="section toolbar">
+      <div class="section">
         <canvas id="qrCanvas" width="140" height="140" class="toolbar-qr"></canvas>
         <div>
           <div class="toolbar-row" style="margin-bottom:10px">
