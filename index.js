@@ -7,6 +7,8 @@ const cors = require("cors");
 const { Server } = require("socket.io");
 
 const app = express();
+// у верхній частині index.js (після створення app)
+app.use(express.static("public"));
 const server = http.createServer(app);
 app.set("trust proxy", true);
 app.use(cors());
@@ -190,63 +192,7 @@ io.on("connection", (socket) => {
 });
 
 /* ======================= CSS ======================= */
-const baseCSS = `
-:root{--bg:#0f1226;--text:#e8eef6;--muted:#9fb3d8;--accent:#ffb300;--card:#171a34;--ok:#22c55e;--err:#ef4444}
-*{box-sizing:border-box}
-body{margin:0;background:radial-gradient(1200px 800px at 80% -10%,#2a2f63 0%,rgba(15,18,38,.6) 60%),var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif}
-.wrap{max-width:1000px;margin:32px auto;padding:16px}
-.card{background:rgba(20,26,48,.6);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
-.card .section{padding:12px 0}
-.card .section + .section{padding-top:16px}
-h1,h2,h3{margin:0 0 10px 0} .muted{color:var(--muted)}
-.grid{display:grid;gap:16px}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media(min-width:860px){.grid-2.wide-cols{grid-template-columns:1.2fr .8fr}}
-label{font-size:.85rem;color:var(--muted)}
-input,textarea,select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:#0b1220;color:#fff}
-.btn{padding:.7rem 1rem;border:0;border-radius:12px;background:linear-gradient(135deg,#ffb300,#ff6f00);color:#1b1200;font-weight:800;cursor:pointer}
-.btn.btn-primary{background:linear-gradient(135deg,#ffb300,#ff6f00)}
-.btn.btn-ghost{background:rgba(255,255,255,.08);color:#fff}
-.btn.sec{background:#0ea5e9;color:#001018}
-.badge{display:inline-flex;gap:.5rem;align-items:center;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);padding:.35rem .6rem;border-radius:999px;color:var(--muted)}
-.log-box{min-height:160px;font-family:ui-monospace,Consolas,monospace;font-size:13px;line-height:1.35;white-space:pre-wrap;background:rgba(10,12,24,.55);border:1px dashed rgba(255,255,255,.12);border-radius:12px;padding:12px;overflow:auto}
-.choices{display:grid;gap:10px;margin-top:12px}
-.choice{border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:12px;background:#0b1220;cursor:pointer}
-.choice.correct{outline:2px solid var(--ok)} .choice.wrong{opacity:.5}
-.score{display:flex;flex-direction:column;gap:6px}
-.row{display:grid;gap:12px;grid-template-columns:1fr 60px}
-.btn-row{display:flex;gap:10px;flex-wrap:wrap}
-.actions-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.join-row{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center}
-.share-link{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
-.share-link input[type="text"]{flex:1 1 260px;min-width:0}
-.layout-host,.layout-player{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.player-card{order:1}.events-card{order:2}
-@media (max-width:768px){
-  .grid-2,.layout-host,.layout-player{grid-template-columns:1fr}
-  .player-card{order:1}.events-card{order:2}
-  .join-row{grid-template-columns:1fr}
-  .btn,.btn-primary,.btn-ghost{width:100%}
-  .actions-3{grid-template-columns:1fr}
-  .share-link{flex-direction:column;align-items:stretch}
-  h2,h3{font-size:18px}
-}
-@media (max-width:380px){body{font-size:15px} .log-box{font-size:12.5px}}
-/* Шапка панелі вчителя */
-.toolbar{display:grid;grid-template-columns:140px 1fr;gap:16px;align-items:flex-start}
-.toolbar-qr{width:140px;height:140px;border-radius:12px;background:#fff;justify-self:start}
-.toolbar-row{display:grid;grid-template-columns:1fr;gap:10px; padding-right: 16px;}
-.toolbar-row input{width:100%}.toolbar-row .btn{white-space:nowrap}
-@media (max-width:360px){
-  .toolbar{grid-template-columns:1fr}
-  .toolbar-qr{justify-self:center;width:120px;height:120px}
-  .toolbar-row{grid-template-columns:1fr}
-  .toolbar-row .btn{width:100%}
-}
-/* Домашні посилання як кнопки */
-.btn-link{display:inline-block;text-decoration:none;color:#1b1200;background:linear-gradient(135deg,#ffb300,#ff6f00);padding:.7rem 1rem;border-radius:12px;font-weight:800}
-.btn-link.sec{background:#0ea5e9;color:#001018}
-`;
+
 
 /* ======================= ROUTES ======================= */
 
@@ -255,7 +201,7 @@ app.get("/", (_req, res) => {
   res.type("html").send(`<!doctype html><meta charset="utf-8"/>
   <title>SparkSchool Game</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>${baseCSS}</style>
+  <link rel="stylesheet" href="/style.css">
 
   <div class="wrap grid">
     <section class="card">
@@ -285,7 +231,7 @@ app.get("/host", (req, res) => {
   res.type("html").send(`<!doctype html><meta charset="utf-8"/>
   <title>Host • SparkSchool</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>${baseCSS}</style>
+  <link rel="stylesheet" href="/style.css">
 
   <div class="wrap">
     <section class="card">
@@ -416,7 +362,7 @@ app.get("/player", (req, res) => {
   res.type("html").send(`<!doctype html><meta charset="utf-8"/>
   <title>Player • SparkSchool</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>${baseCSS}</style>
+  <link rel="stylesheet" href="/style.css">
 
   <div class="wrap grid-2">
     <section class="card player-card">
@@ -495,7 +441,7 @@ app.get("/screen", (req, res) => {
   res.type("html").send(`<!doctype html><meta charset="utf-8"/>
   <title>Screen • SparkSchool</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>${baseCSS}</style>
+  <link rel="stylesheet" href="/style.css">
 
   <div class="wrap">
     <div class="card">
