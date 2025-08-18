@@ -135,12 +135,26 @@ input, textarea, select{
 
 /* Варіанти відповідей (кнопки) */
 .choices{ display:grid; gap:10px; margin-top:12px; }
-.choice{
+.choice {
   border:1px solid rgba(255,255,255,.14);
   border-radius:10px;
   padding:12px;
+  padding-left:14px; /* відступ тексту зліва */
   background:#0b1220;
   cursor:pointer;
+  margin-bottom:12px; /* проміжок між варіантами */
+}
+
+.choice:last-child {
+  margin-bottom:0; /* щоб останній не мав зайвого відступу */
+}
+input[type="text"] {
+  margin-bottom:12px;
+  padding-left:14px;
+}
+
+input[type="text"]:last-child {
+  margin-bottom:0;
 }
 .choice.correct{ outline:2px solid var(--ok); }
 .choice.wrong{ opacity:.5; }
@@ -153,29 +167,30 @@ input, textarea, select{
    ШАПКА ПАНЕЛІ ВЧИТЕЛЯ (QR + керування)
 ================================ */
 /* Весь верхній блок: QR ліворуч, керування праворуч */
-.toolbar{
-  display:grid;
-  grid-template-columns: 140px 1fr; /* QR + правий стовпчик */
-  gap:12px;                         /* зменшений відступ між QR і керуванням */
-  align-items:flex-start;
-  padding-right:8px;                /* невеликий відступ від правого краю картки */
+/* Панель з QR і кнопками */
+.toolbar {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 16px;
+  align-items: stretch; /* робить однакову висоту */
 }
 
-/* Сам квадрат з QR */
-.toolbar-qr{
-  width:140px;
-  height:140px;
-  border-radius:12px;
-  background:#fff;
-  justify-self:start;
+.toolbar-qr {
+  width: 140px;
+  height: auto;          /* адаптивна висота */
+  border-radius: 12px;
+  background: #fff;
+  justify-self: start;
 }
 
-/* Усередині правого стовпчика — кожен ряд (поле + кнопка) */
-.toolbar-row{
-  display:grid;
-  grid-template-columns:1fr;        /* ← поле над кнопкою (вертикально) */
-  gap:8px;                          /* проміжок між полем та кнопкою */
+.toolbar-row {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* розтягує елементи */
+  gap: 10px;
+  height: 100%; /* щоб рівнялося з QR */
 }
+
 
 /* Поля та кнопки в шапці поводяться як і решта */
 .toolbar-row input{ width:100%; }
