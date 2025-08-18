@@ -235,7 +235,7 @@ input,textarea,select{width:100%;padding:10px 12px;border-radius:10px;border:1px
 /* Шапка панелі вчителя */
 .toolbar{display:grid;grid-template-columns:140px 1fr;gap:16px;align-items:flex-start}
 .toolbar-qr{width:140px;height:140px;border-radius:12px;background:#fff;justify-self:start}
-.toolbar-row{display:grid;grid-template-columns:1fr auto;gap:10px}
+.toolbar-row{display:grid;grid-template-columns:1fr;gap:10px; padding-right: 16px;}
 .toolbar-row input{width:100%}.toolbar-row .btn{white-space:nowrap}
 @media (max-width:360px){
   .toolbar{grid-template-columns:1fr}
