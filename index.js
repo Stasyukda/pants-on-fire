@@ -298,8 +298,6 @@ app.get("/host", (req, res) => {
           <div class="toolbar-row" style="margin-bottom:10px">
             <input id="hostRoom" placeholder="Кімната" value="class-1" />
             <button class="btn btn-primary" id="hostJoinBtn">Створити / Підключитись</button>
-          </div>
-          <div class="toolbar-row">
             <input id="shareUrl" type="text" readonly />
             <button class="btn" id="copyLink">Копіювати</button>
           </div>
