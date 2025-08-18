@@ -355,6 +355,132 @@ input,textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid 
 .home-links a{flex:1 1 180px;text-align:center}
 /* наприклад, щоб кнопку було трохи ширше за поле */
 .toolbar-right .row:nth-child(2){grid-template-columns:minmax(0,0.8fr) auto}
+/* Центр і «повітря» */
+.wrap{max-width:1000px;margin:0 auto;padding:16px}
+.card{background:rgba(20,26,48,.6);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:20px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.teacher{padding-right:24px}
+
+/* Верх панелі: QR + кнопки */
+.teacher-head{display:flex;align-items:center;gap:20px}
+.qr{width:160px;flex:0 0 160px}
+.qr img{width:100%;display:block;border-radius:12px}
+.controls{flex:1;display:flex;flex-direction:column;gap:12px}
+
+/* Рядок з посиланням і копіюванням */
+.linkrow{display:flex;gap:12px}
+.url{flex:1;min-width:0;background:#0f132b;color:#e8eef6;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 14px}
+
+/* Поля питання/відповідей (за потреби) */
+.qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+.qa-grid > .input:first-child{grid-column:1/-1}
+.select-wrap{display:flex;flex-direction:column;gap:6px}
+
+/* Кнопки дій */
+.actions{grid-column:1/-1;display:flex;gap:12px;justify-content:flex-start;margin-top:8px}
+.btn{border:none;border-radius:14px;padding:14px 18px;font-weight:700;cursor:pointer;transition:transform .06s ease,opacity .2s}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:linear-gradient(90deg,#ffb300,#ff7a00);color:#111}
+.btn.primary.ghost{background:transparent;border:1px solid rgba(255,255,255,.2);color:#e8eef6}
+.btn.secondary{background:#22b8ff;color:#0f1226}
+
+/* Інпути/селекти */
+.input, select{width:100%;background:#0f132b;color:#e8eef6;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 14px;outline:none}
+.input:focus, select:focus{border-color:#ffb300}
+
+/* Мобілка */
+@media (max-width:720px){
+  .teacher-head{flex-direction:column;align-items:stretch}
+  .qr{width:200px;align-self:center}
+  .linkrow{flex-direction:column}
+  .qa-grid{grid-template-columns:1fr}
+  .actions{justify-content:center}
+}
+/* Базові картки */
+.card{
+  background:rgba(20,26,48,.6);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:16px;
+  padding:20px;
+  box-shadow:0 8px 24px rgba(0,0,0,.25);
+}
+
+/* Панель вчителя: "повітря" справа */
+.card.teacher{padding-right:24px}
+
+/* Шапка з QR та керуванням */
+.toolbar{
+  display:flex;
+  align-items:center;
+  gap:20px;
+}
+
+/* Canvas з QR */
+.toolbar-qr{
+  width:160px; height:160px;       /* канвас фіксованого розміру */
+  border-radius:12px; display:block;
+}
+
+/* Права колонка з полями/кнопками */
+.toolbar-right{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+/* Рядки всередині правої колонки */
+.row{display:flex; gap:12px}
+.row input{flex:1; min-width:0}
+
+/* Форма нового питання: сітка */
+.form{
+  display:grid;
+  grid-template-columns:1fr 1fr;   /* 2 колонки на десктопі */
+  gap:12px;
+  margin-top:18px;
+}
+
+/* Поле питання — на всю ширину */
+.form #qText{grid-column:1/-1}
+
+/* Кнопки дій знизу */
+.actions-3{
+  grid-column:1/-1;
+  display:flex;
+  gap:12px;
+  justify-content:flex-start;      /* або center — за бажанням */
+  margin-top:8px;
+}
+
+/* Узгоджений стиль інпутів і селектів */
+.form input, .row input, .form select{
+  background:#0f132b; color:#e8eef6;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:12px;
+  padding:12px 14px;
+  outline:none;
+}
+.form input:focus, .form select:focus{border-color:#ffb300}
+
+/* Кнопки (делікатно, щоб не ламати існуючі стилі) */
+.btn{
+  border:none; border-radius:14px;
+  padding:14px 18px; font-weight:700;
+  cursor:pointer; transition:transform .06s ease, opacity .2s;
+}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:linear-gradient(90deg,#ffb300,#ff7a00); color:#111}
+
+/* Мобільна адаптація */
+@media (max-width:720px){
+  .toolbar{flex-direction:column; align-items:stretch}
+  .toolbar-qr{width:200px; height:200px; align-self:center}
+  .row{flex-direction:column}
+  .form{grid-template-columns:1fr}  /* усе в один стовпець */
+  .actions-3{justify-content:center}
+}
+
+
 `;
 /* ===================== РОУТИ ===================== */
 
@@ -397,7 +523,7 @@ app.get("/host", (req, res) => {
 <style>${baseCSS}</style>
 
 <div class="wrap">
-  <section class="card">
+  <section class="card teacher">
     <h2>Панель вчителя</h2>
 
     <!-- Шапка: QR + керування -->
@@ -427,7 +553,15 @@ app.get("/host", (req, res) => {
       <input id="optB" placeholder="Варіант B"/>
       <input id="optC" placeholder="Варіант C"/>
       <input id="optD" placeholder="Варіант D"/>
-      <input id="right" placeholder="Правильна (0-3)"/>
+      <label style="display:flex; flex-direction:column; gap:6px">
+  Правильна відповідь
+  <select id="right">
+    <option value="0">A</option>
+    <option value="1">B</option>
+    <option value="2">C</option>
+    <option value="3">D</option>
+  </select>
+</label>
       <input id="time" inputmode="numeric" pattern="\\d*" placeholder="Таймер (сек)" value="20"/>
 
       <div class="actions-3">
