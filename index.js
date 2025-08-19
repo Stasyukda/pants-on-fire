@@ -356,25 +356,37 @@ app.get("/player", (req, res) => {
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="/style.css">
 
-  <div class="wrap grid-2">
-    <section class="card player-card">
-      <h3>Player</h3>
-      <div class="join-row">
-        <input id="room" placeholder="Кімната" value="class-1" />
-        <input id="user" placeholder="Ім’я" />
+  <div class="wrap grid">
+  <!-- PLAYER -->
+  <section class="card player-card">
+    <h3>Player</h3>
+
+    <div class="section">
+      <div class="stack-12">
+        <input id="room" placeholder="Кімната" value="class-1"/>
+        <input id="user" placeholder="Ім’я"/>
         <button class="btn btn-primary" id="joinBtn">Join</button>
       </div>
+    </div>
+    <div class="section">
       <p class="muted">Після Join чекайте на питання від вчителя…</p>
-      <div id="stage" class="section"></div>
-    </section>
+    </div>
+  </section>
 
-    <section class="card events-card">
-      <h3>Події</h3>
+  <!-- EVENTS / SCORE -->
+  <section class="card events-card">
+    <h3>Події</h3>
+    <div class="section">
       <div id="playerLog" class="log-box"></div>
-      <h3 class="section">Бали</h3>
-      <div id="playerScore" class="card" style="min-height:56px"></div>
-    </section>
-  </div>
+    </div>
+
+    <h3>Бали</h3>
+    <div class="section">
+      <div id="playerScore" class="card" style="min-height:56px;padding:8px"></div>
+    </div>
+  </section>
+</div>
+
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
