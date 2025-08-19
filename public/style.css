@@ -251,3 +251,16 @@ input[type="text"]:last-child {
   .form-stack select,
   .form-stack button { height: 50px; line-height: 50px; }
 }
+/* Універсальні вертикальні стеки для форм/секцій */
+.stack-12{display:flex;flex-direction:column;gap:12px}
+.stack-16{display:flex;flex-direction:column;gap:16px}
+
+/* Player: висота лог-боксу і відступи */
+#playerLog{min-height:220px}
+#playerScore{min-height:56px}
+
+/* Заголовки секцій у картках трохи відступають від лівого краю */
+.card h2,.card h3{padding-left:4px}
+
+/* Щоб правий край елементів не «липнув» до рамки в картці */
+.card .section > *{margin-right:0}
