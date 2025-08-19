@@ -215,3 +215,39 @@ input[type="text"]:last-child {
   font-weight:800;
 }
 .btn-link.sec{ background:#0ea5e9; color:#001018; }
+/* ===== УНІВЕРСАЛЬНИЙ СТЕК ДЛЯ ФОРМ У КАРТКАХ ===== */
+/* Вішай .form-stack на контейнер із полями/кнопками */
+.form-stack > * {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 0 12px 0;       /* рівний вертикальний крок між рядками */
+}
+
+.form-stack > *:last-child { margin-bottom: 0; }
+
+/* Однакова висота елементів керування */
+.form-stack input,
+.form-stack select,
+.form-stack textarea,
+.form-stack button {
+  height: 52px;             /* одна висота для полів/кнопок */
+  padding: 0 16px;          /* комфортний внутрішній відступ */
+  line-height: 52px;        /* щоб текст/плейсхолдер виглядав по центру */
+}
+
+/* Текстові області можуть бути вищі */
+.form-stack textarea {
+  height: auto;
+  min-height: 120px;
+  line-height: 1.4;
+  padding: 12px 16px;
+}
+
+/* На дуже вузьких екранах трохи зменшуємо крок */
+@media (max-width: 380px) {
+  .form-stack > * { margin-bottom: 10px; }
+  .form-stack input,
+  .form-stack select,
+  .form-stack button { height: 50px; line-height: 50px; }
+}
