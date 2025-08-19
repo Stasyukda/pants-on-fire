@@ -242,39 +242,31 @@ app.get("/host", (req, res) => {
         <canvas id="qrCanvas" width="140" height="140" class="toolbar-qr"></canvas>
         <div>
           <div class="toolbar-row" style="margin-bottom:10px">
-            <input id="hostRoom" placeholder="Кімната" value="class-1" />
-            <button class="btn btn-primary" id="hostJoinBtn">Створити / Підключитись</button>
-            <input id="shareUrl" type="text" readonly />
-            <button class="btn" id="copyLink">Копіювати</button>
+            <div class="form-stack">
+             <input id="hostRoom" placeholder="Кімната" value="class-1" />
+             <button class="btn btn-primary" id="hostJoinBtn">Створити / Підключитись</button>
+             <input id="shareUrl" type="text" readonly />
+             <button class="btn" id="copyLink">Копіювати</button>
+            </div>
           </div>
         </div>
       </div>
 
-      <h3 class="section" style="padding-top:0">Нове питання</h3>
-      <div class="section">
-        <input id="qText" placeholder="Питання (напр.: Як перекладається слово lightning?)" />
-        <div class="btn-row" style="margin-top:10px">
-          <input id="optA" placeholder="Варіант A" />
-          <input id="optB" placeholder="Варіант B" />
-        </div>
-        <div class="btn-row" style="margin-top:10px">
-          <input id="optC" placeholder="Варіант C" />
-          <input id="optD" placeholder="Варіант D" />
-        </div>
-        <div class="btn-row" style="margin-top:10px">
-          <select id="right" aria-label="Правильна відповідь">
-            <option value="0">A</option><option value="1">B</option>
-            <option value="2">C</option><option value="3">D</option>
-          </select>
-          <input id="time" inputmode="numeric" pattern="\\d*" placeholder="Таймер (сек)" value="20" />
-        </div>
-        <div class="actions-3" style="margin-top:12px">
-          <button class="btn btn-primary" id="btnStart">Start</button>
-          <button class="btn" id="btnReveal">Reveal</button>
-          <button class="btn" id="btnNext">Next</button>
-        </div>
-      </div>
-
+      <div class="card">
+  <h3>Нове питання</h3>
+  <div class="form-stack">
+    <input id="qText" placeholder="Питання …" />
+    <input id="optA" placeholder="Варіант A" />
+    <input id="optB" placeholder="Варіант B" />
+    <input id="optC" placeholder="Варіант C" />
+    <input id="optD" placeholder="Варіант D" />
+    <select id="right"> … </select>
+    <input id="time" inputmode="numeric" pattern="\d*" value="20" />
+    <button class="btn btn-primary" id="btnStart">Start</button>
+    <button class="btn" id="btnReveal">Reveal</button>
+    <button class="btn" id="btnNext">Next</button>
+  </div>
+</div>
       <h3 class="section">Стан</h3>
       <div class="section muted" id="hostState">Таймер: 0 • Гравців: 0</div>
       <h3 class="section">Учасники</h3>
